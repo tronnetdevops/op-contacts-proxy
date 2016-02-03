@@ -44,22 +44,18 @@
 				$client = new Google_Client();
 				$client->setApplicationName("OP Contacts Proxy");
 				$client->setAuthConfigFile( dirname(__FILE__) . '/includes/data/google_auth.json');
-			
+				$client->setRedirectUri('http://wpdemo.tronnet.me/');
 				$client->addScope("https://www.google.com/m8/feeds");
 			
-				if (! isset($_GET['code'])) {
-					$nonce = uniqid();
-					$_SESSION['cb_op_nonce'] = $nonce;
-					
-					$client->setRedirectUri('http://wpdemo.tronnet.me/');
-					
-					$auth_url = $client->createAuthUrl();
-					$auth_url .= '&state=cb_op_action_oauth';
-					$auth_url .= '&nonce='.$nonce;
-					
-					header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
-					die();
-				}
+				$nonce = uniqid();
+				$_SESSION['cb_op_nonce'] = $nonce;
+				
+				$auth_url = $client->createAuthUrl();
+				$auth_url .= '&state=cb_op_action_oauth';
+				$auth_url .= '&nonce='.$nonce;
+				
+				header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
+				die();
 			} else if ($_GET['state'] == 'cb_op_action_oauth' && $_GET['nonce'] == $_SESSION['cb_op_nonce']) {
 				session_start();
 
@@ -73,11 +69,11 @@
 				$client = new Google_Client();
 				$client->setApplicationName("OP Contacts Proxy");
 				$client->setAuthConfigFile( dirname(__FILE__) . '/includes/data/google_auth.json');
-				
-				$client->authenticate($_GET['code']);
-				
+				$client->setRedirectUri('http://wpdemo.tronnet.me/');
 				$client->addScope("https://www.google.com/m8/feeds");
 				
+				$client->authenticate($_GET['code']);
+
 				add_user_meta($current_user->ID, '_cb_op_google_code', $_GET['code']);
 				add_user_meta($current_user->ID, '_cb_op_google_access_token', $client->getAccessToken());
 				
