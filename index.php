@@ -34,16 +34,35 @@
 		 */
 		private function __construct() {
 			
-			set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
+			if (isset($_GET['cb_op_action_oauth'])){
+				session_start();
+
+				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
 			
-			require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
+				require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
 				
-				
-			$client = new Google_Client();
-			$client->setApplicationName("OP Contacts Proxy");
-			$client->setAuthConfigFile( dirname(__FILE__) . '/includes/data/google_auth.json');
+				$client = new Google_Client();
+				$client->setApplicationName("OP Contacts Proxy");
+				$client->setAuthConfigFile( dirname(__FILE__) . '/includes/data/google_auth.json');
 			
-			$client->addScope("https://www.google.com/m8/feeds");
+				$client->addScope("https://www.google.com/m8/feeds");
+			
+				if (! isset($_GET['code'])) {
+					$nonce = uniqid();
+					$_SESSION['cb_op_nonce'] = $nonce;
+					$auth_url = $client->createAuthUrl();
+					$auth_url .= '&state=cb_op_action_oauth';
+					$auth_url .= '&nonce='.$nonce;
+					header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
+				}
+			} else if ($_GET['state'] == 'cb_op_action_oauth' && $_GET['nonce'] == $_SESSION['cb_op_nonce']) {
+					$client->authenticate($_GET['code']);
+					$_SESSION['access_token'] = $client->getAccessToken();
+					$redirect_uri = 'https://' . $_SERVER['HTTP_HOST'] . $APPPATH;
+					header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
+				}
+			}
+
 			
 			
 		}
