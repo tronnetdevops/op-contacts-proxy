@@ -56,11 +56,10 @@
 					header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
 				}
 			} else if ($_GET['state'] == 'cb_op_action_oauth' && $_GET['nonce'] == $_SESSION['cb_op_nonce']) {
-					$client->authenticate($_GET['code']);
-					$_SESSION['access_token'] = $client->getAccessToken();
-					$redirect_uri = 'https://' . $_SERVER['HTTP_HOST'] . $APPPATH;
-					header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
-				}
+				$client->authenticate($_GET['code']);
+				$_SESSION['access_token'] = $client->getAccessToken();
+				$redirect_uri = 'https://' . $_SERVER['HTTP_HOST'] . $APPPATH;
+				header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
 			}
 
 			
