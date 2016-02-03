@@ -50,12 +50,19 @@
 				if (! isset($_GET['code'])) {
 					$nonce = uniqid();
 					$_SESSION['cb_op_nonce'] = $nonce;
+					
+					$client->setRedirectUri('http://wpdemo.tronnet.me/');
+					
 					$auth_url = $client->createAuthUrl();
 					$auth_url .= '&state=cb_op_action_oauth';
 					$auth_url .= '&nonce='.$nonce;
+					
 					header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
+					die();
 				}
 			} else if ($_GET['state'] == 'cb_op_action_oauth' && $_GET['nonce'] == $_SESSION['cb_op_nonce']) {
+				var_dump($_REQUEST);
+				die();
 				$client->authenticate($_GET['code']);
 				$_SESSION['access_token'] = $client->getAccessToken();
 				$redirect_uri = 'https://' . $_SERVER['HTTP_HOST'] . $APPPATH;
