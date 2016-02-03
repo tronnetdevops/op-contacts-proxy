@@ -46,6 +46,7 @@
 				$client->setAuthConfigFile( dirname(__FILE__) . '/includes/data/google_auth.json');
 				$client->setRedirectUri('http://wpdemo.tronnet.me/');
 				$client->addScope("https://www.google.com/m8/feeds");
+				$client->setApprovalPrompt('consent');
 			
 				$nonce = uniqid();
 				$_SESSION['cb_op_nonce'] = $nonce;
@@ -53,7 +54,6 @@
 				$auth_url = $client->createAuthUrl();
 				$auth_url .= '&state=cb_op_action_oauth';
 				$auth_url .= '&nonce='.$nonce;
-				$auth_url .= '&prompt=consent';
 				
 				header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
 				die();
