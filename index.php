@@ -61,12 +61,20 @@
 					die();
 				}
 			} else if ($_GET['state'] == 'cb_op_action_oauth' && $_GET['nonce'] == $_SESSION['cb_op_nonce']) {
-				var_dump($_REQUEST);
-				die();
+				
+				global $current_user;
+				get_currentuserinfo();
+				
 				$client->authenticate($_GET['code']);
-				$_SESSION['access_token'] = $client->getAccessToken();
-				$redirect_uri = 'https://' . $_SERVER['HTTP_HOST'] . $APPPATH;
-				header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
+				
+				add_user_meta($current_user->ID, '_cb_op_google_code', $_GET['code']);
+				add_user_meta($current_user->ID, '_cb_op_google_access_token', $client->getAccessToken());
+				
+				var_dump($client->getAccessToken());
+				die();
+					
+				// $redirect_uri = 'https://' . $_SERVER['HTTP_HOST'] . $APPPATH;
+				// header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
 			}
 
 			
