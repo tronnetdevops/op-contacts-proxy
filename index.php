@@ -61,6 +61,11 @@
 					die();
 				}
 			} else if ($_GET['state'] == 'cb_op_action_oauth' && $_GET['nonce'] == $_SESSION['cb_op_nonce']) {
+				session_start();
+
+				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
+			
+				require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
 				
 				global $current_user;
 				get_currentuserinfo();
