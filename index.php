@@ -47,7 +47,8 @@
 				$client->setRedirectUri('http://wpdemo.tronnet.me/');
 				$client->addScope("https://www.google.com/m8/feeds");
 				$client->setApprovalPrompt('force');
-			
+				$client->setAccessType('offline');
+				
 				$nonce = uniqid();
 				$_SESSION['cb_op_nonce'] = $nonce;
 				
