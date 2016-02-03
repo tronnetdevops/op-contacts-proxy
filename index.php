@@ -53,6 +53,7 @@
 				$auth_url = $client->createAuthUrl();
 				$auth_url .= '&state=cb_op_action_oauth';
 				$auth_url .= '&nonce='.$nonce;
+				$auth_url .= '&prompt=consent';
 				
 				header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
 				die();
