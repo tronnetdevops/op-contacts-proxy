@@ -1,6 +1,6 @@
 <?php
 	/**
-	 * Plugin Name: CB Dashboard
+	 * Plugin Name: Ontraport Contact Ingetration
 	 * Plugin URI: http://tronnet.me
 	 * Version: 0.9.8
 	 * Author: Tronnet DevOps
