@@ -65,7 +65,13 @@
 				global $current_user;
 				get_currentuserinfo();
 				
+				$client = new Google_Client();
+				$client->setApplicationName("OP Contacts Proxy");
+				$client->setAuthConfigFile( dirname(__FILE__) . '/includes/data/google_auth.json');
+				
 				$client->authenticate($_GET['code']);
+				
+				$client->addScope("https://www.google.com/m8/feeds");
 				
 				add_user_meta($current_user->ID, '_cb_op_google_code', $_GET['code']);
 				add_user_meta($current_user->ID, '_cb_op_google_access_token', $client->getAccessToken());
