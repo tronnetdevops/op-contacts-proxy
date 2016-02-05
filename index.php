@@ -124,8 +124,13 @@
 				$client->addScope("https://www.google.com/m8/feeds");
 				
 				$refresh_token = get_user_meta($user_id, '_cb_op_google_refresh_token', true);
-
-				$client->refreshToken($refresh_token);
+				
+				try{
+					$client->refreshToken($refresh_token);
+					
+				} catch (Exception $e){
+					file_put_contents( dirname(__FILE__) .'/update.txt', "Issues refreshing token: " . $refresh_token);
+				}
 				
 				$ret = OPContactProxy::_create_contact($client, $_REQUEST['fname']." ".$_REQUEST['lname'], $_REQUEST['pnum'], $_REQUEST['email']);
 				
