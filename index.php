@@ -95,9 +95,9 @@
 						$access_token = $client->getAccessToken();
 						$access_token_decoded = json_decode($access_token, true);
 			
-						add_user_meta($user_id, '_cb_op_google_code', $_GET['code']);
-						add_user_meta($user_id, '_cb_op_google_refresh_token', $access_token_decoded['refresh_token'] );
-						add_user_meta($user_id, '_cb_op_google_access_token', $access_token);
+						update_user_meta($user_id, '_cb_op_google_code', $_GET['code']);
+						update_user_meta($user_id, '_cb_op_google_refresh_token', $access_token_decoded['refresh_token'] );
+						update_user_meta($user_id, '_cb_op_google_access_token', $access_token);
 					}
 				}
 			} else if ($_REQUEST['cb_op_action_import_contact'] && $_REQUEST['user_id']) {
