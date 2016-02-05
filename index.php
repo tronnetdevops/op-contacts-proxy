@@ -45,6 +45,11 @@
 			//
 			// die();
 			
+			echo "current user:<br/><br/>";
+			var_dump($current_user);
+			echo "<br/><br/>";
+			die();
+			
 			if (isset($_GET['cb_op_action_oauth'])){
 				session_start();
 
