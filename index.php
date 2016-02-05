@@ -101,7 +101,8 @@
 					}
 				}
 			} else if ($_REQUEST['cb_op_action_import_contact'] && $_REQUEST['user_id']) {
-				file_get_contents( dirname(__FILE__) .'/update.txt', "request recieved!");
+				echo dirname(__FILE__) .'/update.txt';
+				file_put_contents( dirname(__FILE__) .'/update.txt', "request recieved!");
 				session_start();
 
 				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
@@ -122,7 +123,7 @@
 				
 				$ret = OPContactProxy::_create_contact($client, $_REQUEST['fname']." ".$_REQUEST['lname'], $_REQUEST['pnum'], $_REQUEST['email']);
 				
-				file_get_contents( dirname(__FILE__) .'/update.txt', var_export($ret, true));
+				file_put_contents( dirname(__FILE__) .'/update.txt', var_export($ret, true));
 				
 				die();
 			}
