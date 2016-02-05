@@ -119,9 +119,7 @@
 
 				$client->refreshToken($refresh_token);
 				
-				$ret = OPContactProxy::_create_contact($client, "Tron HammerMan", "8055555555", "thetron@tronet.me");
-				
-				var_dump($ret);
+				$ret = OPContactProxy::_create_contact($client, $_REQUEST['fname']." ".$_REQUEST['lname'], $_REQUEST['pnum'], $_REQUEST['email']);
 				
 				die();
 			}
