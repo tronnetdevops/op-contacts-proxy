@@ -34,6 +34,9 @@
 		 */
 		private function __construct() {
 			
+			global $current_user;
+			get_currentuserinfo();
+			
 			$refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
 			
 			
