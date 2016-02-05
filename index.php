@@ -72,24 +72,21 @@
 			} else if (isset($_GET['state'])){
 				$action = explode('_NONCE_', $_GET['state']);
 				if ($action[0] == 'cb_op_action_oauth'){
-				
+					$nonce = $action[1];
 					echo "We got a nonce!<br/>";
-					var_dump($action[1]);
+					var_dump($nonce);
 					echo "<br/><hr/>";
-			
-					$parsedNonce = explode('_UID_', $action[1]);
+					
+					$parsedNonce = explode('_UID_', $nonce);
 			
 					session_start($parsedNonce[0]);
 					$user_id = $parsedNonce[1];
 			
-					if ($_REQUEST['nonce'] == $_SESSION['cb_op_nonce']) {
+					if ($nonce == $_SESSION['cb_op_nonce']) {
 						echo "yay, nonces match!";
 						set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
 		
 						require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
-			
-						global $current_user;
-						get_currentuserinfo();
 			
 						$client = new Google_Client();
 						$client->setApplicationName("OP Contacts Proxy");
@@ -104,16 +101,16 @@
 			
 						echo "Decoded: <br/>";
 						var_dump($access_token_decoded);
-						add_user_meta($current_user->ID, '_cb_op_google_code', $_GET['code']);
-						add_user_meta($current_user->ID, '_cb_op_google_refresh_token', $access_token_decoded['refresh_token'] );
-						add_user_meta($current_user->ID, '_cb_op_google_access_token', $access_token);
+						add_user_meta($user_id, '_cb_op_google_code', $_GET['code']);
+						add_user_meta($user_id, '_cb_op_google_refresh_token', $access_token_decoded['refresh_token'] );
+						add_user_meta($user_id, '_cb_op_google_access_token', $access_token);
 			
 						echo "<br/><br/><hr/>given refresh token";
 			
 						var_dump($access_token_decoded['refresh_token']);
 			
 						echo "<br/><br/><hr/>saved refresh token";
-						$refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
+						$refresh_token = get_user_meta($user_id, '_cb_op_google_refresh_token', true);
 						var_dump($refresh_token);
 			
 						echo "<br/><br/><hr/>access token";
@@ -124,15 +121,14 @@
 						// header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
 					}
 				}
-			} else if ($_GET['cb_op_action_import_contact']) {
+			} else if ($_REQUEST['cb_op_action_import_contact'] && $_REQUEST['user_id']) {
 				session_start();
 
 				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
 			
 				require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
 				
-				global $current_user;
-				get_currentuserinfo();
+				$user_id = $_REQUEST['user_id'];
 				
 				$client = new Google_Client();
 				$client->setApplicationName("OP Contacts Proxy");
@@ -140,7 +136,7 @@
 				$client->setRedirectUri('http://wpdemo.tronnet.me/');
 				$client->addScope("https://www.google.com/m8/feeds");
 				
-				$refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
+				$refresh_token = get_user_meta($user_id, '_cb_op_google_refresh_token', true);
 
 				$client->refreshToken($refresh_token);
 				
