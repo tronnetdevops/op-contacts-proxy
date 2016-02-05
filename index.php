@@ -169,10 +169,12 @@
 	        $email->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
 	        $email->setAttribute('address', $emailAddress);
 	        $entry->appendChild($email);
-
-	        $contact = $doc->createElement('gd:phoneNumber', $phoneNumber);
-	        $contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
-	        $entry->appendChild($contact);
+			
+			if ($phoneNumber){
+		        $contact = $doc->createElement('gd:phoneNumber', $phoneNumber);
+		        $contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+		        $entry->appendChild($contact);
+			}
 
 	        $xmlToSend = $doc->saveXML();
 
