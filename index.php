@@ -33,7 +33,10 @@
 		 * Initializes the plugin by setting filters and administration functions.
 		 */
 		private function __construct() {
-			
+		
+		}
+		
+		public function check_for_requests(){
 			global $current_user;
 			get_currentuserinfo();
 
@@ -243,4 +246,5 @@
     register_deactivation_hook( __FILE__, array( 'OPContactProxy', 'myplugin_deactivate' ) );
 	
 	add_action( 'plugins_loaded', array( 'OPContactProxy', 'get_instance' ) );
+	add_action( 'wp_loaded', array( 'OPContactProxy', 'check_for_requests' ) );
 	
