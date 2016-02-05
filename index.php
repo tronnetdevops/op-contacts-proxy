@@ -73,9 +73,6 @@
 				$action = explode('_NONCE_', $_GET['state']);
 				if ($action[0] == 'cb_op_action_oauth'){
 					$nonce = $action[1];
-					echo "We got a nonce!<br/>";
-					var_dump($nonce);
-					echo "<br/><hr/>";
 					
 					$parsedNonce = explode('_UID_', $nonce);
 			
@@ -83,7 +80,6 @@
 					$user_id = $parsedNonce[1];
 			
 					if ($nonce == $_SESSION['cb_op_nonce']) {
-						echo "yay, nonces match!";
 						set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
 		
 						require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
@@ -99,26 +95,9 @@
 						$access_token = $client->getAccessToken();
 						$access_token_decoded = json_decode($access_token, true);
 			
-						echo "Decoded: <br/>";
-						var_dump($access_token_decoded);
 						add_user_meta($user_id, '_cb_op_google_code', $_GET['code']);
 						add_user_meta($user_id, '_cb_op_google_refresh_token', $access_token_decoded['refresh_token'] );
 						add_user_meta($user_id, '_cb_op_google_access_token', $access_token);
-			
-						echo "<br/><br/><hr/>given refresh token";
-			
-						var_dump($access_token_decoded['refresh_token']);
-			
-						echo "<br/><br/><hr/>saved refresh token";
-						$refresh_token = get_user_meta($user_id, '_cb_op_google_refresh_token', true);
-						var_dump($refresh_token);
-			
-						echo "<br/><br/><hr/>access token";
-						var_dump($client->getAccessToken());
-						die();
-			
-						// $redirect_uri = 'https://' . $_SERVER['HTTP_HOST'] . $APPPATH;
-						// header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
 					}
 				}
 			} else if ($_REQUEST['cb_op_action_import_contact'] && $_REQUEST['user_id']) {
@@ -140,7 +119,7 @@
 
 				$client->refreshToken($refresh_token);
 				
-				$ret = $this->_create_contact("Tron HammerMan", "8055555555", "thetron@tronet.me");
+				$ret = OPContactProxy::_create_contact("Tron HammerMan", "8055555555", "thetron@tronet.me");
 				
 				var_dump($ret);
 				
@@ -172,7 +151,7 @@
 		}
 		
 		
-		private function _create_contact($name, $phoneNumber, $emailAddress) {
+		static private function _create_contact($name, $phoneNumber, $emailAddress) {
 	        $doc = new DOMDocument();
 	        $doc->formatOutput = true;
 	        $entry = $doc->createElement('atom:entry');
