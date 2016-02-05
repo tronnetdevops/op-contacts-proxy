@@ -119,7 +119,7 @@
 
 				$client->refreshToken($refresh_token);
 				
-				$ret = OPContactProxy::_create_contact("Tron HammerMan", "8055555555", "thetron@tronet.me");
+				$ret = OPContactProxy::_create_contact($client, "Tron HammerMan", "8055555555", "thetron@tronet.me");
 				
 				var_dump($ret);
 				
@@ -151,7 +151,7 @@
 		}
 		
 		
-		static private function _create_contact($name, $phoneNumber, $emailAddress) {
+		static private function _create_contact($client, $name, $phoneNumber, $emailAddress) {
 	        $doc = new DOMDocument();
 	        $doc->formatOutput = true;
 	        $entry = $doc->createElement('atom:entry');
