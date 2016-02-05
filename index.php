@@ -34,16 +34,16 @@
 		 */
 		private function __construct() {
 			
-			global $current_user;
-			get_currentuserinfo();
-			
-			$refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
-			
-			echo $current_user->ID;
-			
-			var_dump($refresh_token);
-
-			die();
+			// global $current_user;
+			// get_currentuserinfo();
+			//
+			// $refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
+			//
+			// echo $current_user->ID;
+			//
+			// var_dump($refresh_token);
+			//
+			// die();
 			
 			if (isset($_GET['cb_op_action_oauth'])){
 				session_start();
@@ -90,10 +90,21 @@
 				$access_token = $client->getAccessToken();
 				$access_token_decoded = json_decode($access_token, true);
 				
+				echo "Decoded: <br/>";
+				var_dump($access_token_decoded);
 				add_user_meta($current_user->ID, '_cb_op_google_code', $_GET['code']);
 				add_user_meta($current_user->ID, '_cb_op_google_refresh_token', $access_token_decoded['refresh_token'] );
 				add_user_meta($current_user->ID, '_cb_op_google_access_token', $access_token);
 				
+				echo "<br/><br/><hr/>given refresh token";
+				
+				var_dump($access_token_decoded['refresh_token']);
+				
+				echo "<br/><br/><hr/>saved refresh token";
+				$refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
+				var_dump($refresh_token);
+				
+				echo "<br/><br/><hr/>access token";
 				var_dump($client->getAccessToken());
 				die();
 				
