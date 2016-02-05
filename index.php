@@ -113,7 +113,7 @@
 				$currentData = self::get_data("cb_op_emails_saved");
 				$email = $_REQUEST['email'];
 				
-				if (!isset($email) || !empty($email) || in_array($email, $currentData)){
+				if (!isset($email) || empty($email) || in_array($email, $currentData)){
 					die();
 				}
 				
