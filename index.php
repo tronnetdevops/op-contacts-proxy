@@ -110,6 +110,12 @@
 				require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
 				
 				$user_id = $_REQUEST['user_id'];
+				$currentData = self::get_data("cb_op_emails_saved");
+				$email = $_REQUEST['email'];
+				
+				if (!isset($email) || !empty($email) || in_array($email, $currentData)){
+					die();
+				}
 				
 				$client = new Google_Client();
 				$client->setApplicationName("OP Contacts Proxy");
@@ -124,6 +130,10 @@
 				$ret = OPContactProxy::_create_contact($client, $_REQUEST['fname']." ".$_REQUEST['lname'], $_REQUEST['pnum'], $_REQUEST['email']);
 				
 				file_put_contents( dirname(__FILE__) .'/update.txt', var_export($ret, true));
+				
+				$currentData[] = $email;
+				
+				self::save_data("cb_op_emails_saved", $currentData);
 				
 				die();
 			}
@@ -151,7 +161,6 @@
 		public function myplugin_deactivate() {
 
 		}
-		
 		
 		static private function _create_contact($client, $name, $phoneNumber, $emailAddress) {
 	        $doc = new DOMDocument();
