@@ -34,16 +34,16 @@
 		 */
 		private function __construct() {
 			
-			global $current_user;
-			get_currentuserinfo();
-			
-			$refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
-			
-			echo $current_user->ID;
-			
-			var_dump($refresh_token);
-
-			die();
+			// global $current_user;
+			// get_currentuserinfo();
+			//
+			// $refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
+			//
+			// echo $current_user->ID;
+			//
+			// var_dump($refresh_token);
+			//
+			// die();
 			
 			if (isset($_GET['cb_op_action_oauth'])){
 				session_start();
