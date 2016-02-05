@@ -131,7 +131,7 @@
 				} catch (Exception $e){
 					file_put_contents( dirname(__FILE__) .'/update.txt', "Issues refreshing token: " . $refresh_token);
 					
-					die()
+					die();
 				}
 				
 				$ret = OPContactProxy::_create_contact($client, $_REQUEST['fname']." ".$_REQUEST['lname'], $_REQUEST['pnum'], $_REQUEST['email']);
