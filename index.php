@@ -71,7 +71,7 @@
 				die();
 			} else if (isset($_GET['state'])){
 				$action = explode('_NONCE_', $_GET['state']);
-				if ($action[0] == 'cb_op_action_oauth')){
+				if ($action[0] == 'cb_op_action_oauth'){
 				
 					echo "We got a nonce!<br/>";
 					var_dump($action[1]);
