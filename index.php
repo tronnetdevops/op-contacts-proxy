@@ -37,23 +37,16 @@
 		}
 		
 		public function check_for_requests(){
-			global $current_user;
-			get_currentuserinfo();
-
-			// $refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
-			//
-			// echo $current_user->ID;
-			//
-			// var_dump($refresh_token);
-			//
-			// die();
-			
-			echo "current user:<br/><br/>";
-			var_dump($current_user);
-			echo "<br/><br/>";
-			die();
 			
 			if (isset($_GET['cb_op_action_oauth'])){
+				global $current_user;
+				get_currentuserinfo();
+				
+				if (!($current_user instanceof WP_User)){
+					echo "Please <a href='/wp-login.php'>login</a> before attempting to authenticate to google!";
+					die();
+				}
+				
 				session_start();
 
 				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
@@ -68,7 +61,7 @@
 				$client->setApprovalPrompt('force');
 				$client->setAccessType('offline');
 				
-				$nonce = uniqid();
+				$nonce = session_id() .'_UID_'. $current_user->ID;
 				$_SESSION['cb_op_nonce'] = $nonce;
 				
 				$auth_url = $client->createAuthUrl();
@@ -77,47 +70,58 @@
 				
 				header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
 				die();
-			} else if ($_GET['state'] == 'cb_op_action_oauth' && $_GET['nonce'] == $_SESSION['cb_op_nonce']) {
-				session_start();
-
-				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
+			} else if ($_GET['state'] == 'cb_op_action_oauth' && isset($_REQUEST['nonce'])){
+				
+				echo "We got a nonce!<br/>";
+				var_dump($_REQUEST['nonce']);
+				echo "<br/><hr/>";
+				
+				$parsedNonce = explode('_UID_', $_REQUEST['nonce']);
+				
+				session_start($parsedNonce[0]);
+				$user_id = $parsedNonce[1];
+				
+				if ($_REQUEST['nonce'] == $_SESSION['cb_op_nonce']) {
+					echo "yay, nonces match!";
+					set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
 			
-				require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
+					require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
 				
-				global $current_user;
-				get_currentuserinfo();
+					global $current_user;
+					get_currentuserinfo();
 				
-				$client = new Google_Client();
-				$client->setApplicationName("OP Contacts Proxy");
-				$client->setAuthConfigFile( dirname(__FILE__) . '/includes/data/google_auth.json');
-				$client->setRedirectUri('http://wpdemo.tronnet.me/');
-				$client->addScope("https://www.google.com/m8/feeds");
+					$client = new Google_Client();
+					$client->setApplicationName("OP Contacts Proxy");
+					$client->setAuthConfigFile( dirname(__FILE__) . '/includes/data/google_auth.json');
+					$client->setRedirectUri('http://wpdemo.tronnet.me/');
+					$client->addScope("https://www.google.com/m8/feeds");
 				
-				$client->authenticate($_GET['code']);
+					$client->authenticate($_GET['code']);
 				
-				$access_token = $client->getAccessToken();
-				$access_token_decoded = json_decode($access_token, true);
+					$access_token = $client->getAccessToken();
+					$access_token_decoded = json_decode($access_token, true);
 				
-				echo "Decoded: <br/>";
-				var_dump($access_token_decoded);
-				add_user_meta($current_user->ID, '_cb_op_google_code', $_GET['code']);
-				add_user_meta($current_user->ID, '_cb_op_google_refresh_token', $access_token_decoded['refresh_token'] );
-				add_user_meta($current_user->ID, '_cb_op_google_access_token', $access_token);
+					echo "Decoded: <br/>";
+					var_dump($access_token_decoded);
+					add_user_meta($current_user->ID, '_cb_op_google_code', $_GET['code']);
+					add_user_meta($current_user->ID, '_cb_op_google_refresh_token', $access_token_decoded['refresh_token'] );
+					add_user_meta($current_user->ID, '_cb_op_google_access_token', $access_token);
 				
-				echo "<br/><br/><hr/>given refresh token";
+					echo "<br/><br/><hr/>given refresh token";
 				
-				var_dump($access_token_decoded['refresh_token']);
+					var_dump($access_token_decoded['refresh_token']);
 				
-				echo "<br/><br/><hr/>saved refresh token";
-				$refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
-				var_dump($refresh_token);
+					echo "<br/><br/><hr/>saved refresh token";
+					$refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
+					var_dump($refresh_token);
 				
-				echo "<br/><br/><hr/>access token";
-				var_dump($client->getAccessToken());
-				die();
+					echo "<br/><br/><hr/>access token";
+					var_dump($client->getAccessToken());
+					die();
 				
-				// $redirect_uri = 'https://' . $_SERVER['HTTP_HOST'] . $APPPATH;
-				// header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
+					// $redirect_uri = 'https://' . $_SERVER['HTTP_HOST'] . $APPPATH;
+					// header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
+				}
 			} else if ($_GET['cb_op_action_import_contact']) {
 				session_start();
 
