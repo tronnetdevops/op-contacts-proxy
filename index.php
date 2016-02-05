@@ -39,6 +39,7 @@
 			
 			$refresh_token = get_user_meta($current_user->ID, '_cb_op_google_refresh_token', true);
 			
+			echo $current_user->ID;
 			
 			var_dump($refresh_token);
 
