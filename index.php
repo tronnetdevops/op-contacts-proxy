@@ -101,10 +101,11 @@
 					}
 				}
 			} else if ($_REQUEST['cb_op_action_import_contact'] && $_REQUEST['user_id']) {
-				echo dirname(__FILE__) .'/update.txt';
-				file_put_contents( dirname(__FILE__) .'/update.txt', "request recieved!");
+				// echo dirname(__FILE__) .'/update.txt';
+				// file_put_contents( dirname(__FILE__) .'/update.txt', "request recieved!");
 				session_start();
-
+				
+				error_log(var_export($_REQUEST, true));
 				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
 			
 				require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
@@ -136,6 +137,7 @@
 				
 				$ret = OPContactProxy::_create_contact($client, $_REQUEST['fname']." ".$_REQUEST['lname'], $_REQUEST['pnum'], $_REQUEST['email']);
 				
+				error_log(var_export($ret, true));
 				file_put_contents( dirname(__FILE__) .'/update.txt', var_export($ret, true));
 				
 				$currentData[] = $email;
@@ -180,17 +182,27 @@
 
 	        $title = $doc->createElement('title', $name);
 	        $entry->appendChild($title);
-
+					
+	        $content = $doc->createElement('content', 'some content right here');
+	        $content->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+	        $entry->appendChild($content);
+					
 	        $email = $doc->createElement('gd:email');
 	        $email->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
 	        $email->setAttribute('address', $emailAddress);
 	        $entry->appendChild($email);
 			
-			if ($phoneNumber){
-		        $contact = $doc->createElement('gd:phoneNumber', $phoneNumber);
-		        $contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+					if ($phoneNumber){
+						$contact = $doc->createElement('gd:phoneNumber', $phoneNumber);
+						$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
 		        $entry->appendChild($contact);
-			}
+					}
+			
+		      $industry = $doc->createElement('gd:extendedProperty');
+		      $industry->setAttribute('name', 'industry');
+		      $industry->setAttribute('value', 'coolInc');
+		      $industry->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+		      $entry->appendChild($industry);
 
 	        $xmlToSend = $doc->saveXML();
 
