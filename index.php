@@ -209,6 +209,7 @@
 		      $entry->appendChild($industry);
 
 	        $xmlToSend = $doc->saveXML();
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Request XML'.PHP_EOL.$xmlToSend.PHP_EOL, FILE_APPEND);
 					
 					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Priming request header', FILE_APPEND);
 					
