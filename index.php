@@ -188,7 +188,6 @@
 	        $entry->appendChild($title);
 					
 	        $content = $doc->createElement('content', 'some content right here');
-	        $content->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
 	        $entry->appendChild($content);
 					
 	        $email = $doc->createElement('gd:email');
@@ -202,10 +201,18 @@
 		        $entry->appendChild($contact);
 					}
 			
-		      $industry = $doc->createElement('gd:extendedProperty');
-		      $industry->setAttribute('name', 'industry');
-		      $industry->setAttribute('value', 'coolInc');
-		      $industry->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+		      $industry = $doc->createElement('gd:organization');
+					$industry->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+					$industry->setAttribute('label', 'Work');
+					$industry->setAttribute('primary', 'true');
+
+		      $orgName = $doc->createElement('gd:orgName', 'Testo Name');
+	        $industry->appendChild($orgName);
+		      $orgName = $doc->createElement('gd:orgTitle', 'Some Title');
+	        $industry->appendChild($orgName);
+		      $orgName = $doc->createElement('gd:orgDepartment', 'Industry');
+	        $industry->appendChild($orgName);
+					
 		      $entry->appendChild($industry);
 
 	        $xmlToSend = $doc->saveXML();
