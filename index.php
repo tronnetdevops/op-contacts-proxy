@@ -102,10 +102,9 @@
 				}
 			} else if ($_REQUEST['cb_op_action_import_contact'] && $_REQUEST['user_id']) {
 				// echo dirname(__FILE__) .'/update.txt';
-				// file_put_contents( dirname(__FILE__) .'/update.txt', "request recieved!");
+				file_put_contents( dirname(__FILE__) .'/update.txt', "request recieved!", FILE_APPEND);
 				session_start();
 				
-				error_log(var_export($_REQUEST, true));
 				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
 			
 				require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
@@ -130,15 +129,14 @@
 					$client->refreshToken($refresh_token);
 					
 				} catch (Exception $e){
-					file_put_contents( dirname(__FILE__) .'/update.txt', "Issues refreshing token: " . $refresh_token);
+					file_put_contents( dirname(__FILE__) .'/update.txt', "Issues refreshing token: " . $refresh_token, FILE_APPEND);
 					
 					die();
 				}
 				
 				$ret = OPContactProxy::_create_contact($client, $_REQUEST['fname']." ".$_REQUEST['lname'], $_REQUEST['pnum'], $_REQUEST['email']);
 				
-				error_log(var_export($ret, true));
-				file_put_contents( dirname(__FILE__) .'/update.txt', var_export($ret, true));
+				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 				
 				$currentData[] = $email;
 				
@@ -214,6 +212,9 @@
 	        $val = $client->getAuth()->authenticatedRequest($req);
 
 	        $response = $val->getResponseBody();
+					
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'===RESPONSE==='.PHP_EOL.$response.PHP_EOL.PHP_EOL, FILE_APPEND);
+					
 
 	        $xmlContact = simplexml_load_string($response);
 	        $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
