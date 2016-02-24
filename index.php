@@ -105,6 +105,10 @@
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL."request recieved!".PHP_EOL, FILE_APPEND);
 				session_start();
 				
+				
+				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.var_export($_REQUEST, true).PHP_EOL, FILE_APPEND);
+				
+				
 				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
 			
 				require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
