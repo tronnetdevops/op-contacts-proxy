@@ -202,14 +202,13 @@
 					}
 			
 		      $industry = $doc->createElement('gd:organization');
-					$industry->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+					// $industry->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+					$industry->setAttribute('label', 'Industry');
 					$industry->setAttribute('primary', 'true');
 
-		      $orgName = $doc->createElement('gd:orgName', 'Testo Name');
+		      $orgName = $doc->createElement('gd:orgName', 'Some Industry');
 	        $industry->appendChild($orgName);
 		      $orgName = $doc->createElement('gd:orgTitle', 'Some Title');
-	        $industry->appendChild($orgName);
-		      $orgName = $doc->createElement('gd:orgDepartment', 'Industry');
 	        $industry->appendChild($orgName);
 					
 		      $entry->appendChild($industry);
