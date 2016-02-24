@@ -203,7 +203,6 @@
 			
 		      $industry = $doc->createElement('gd:organization');
 					$industry->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
-					$industry->setAttribute('label', 'Work');
 					$industry->setAttribute('primary', 'true');
 
 		      $orgName = $doc->createElement('gd:orgName', 'Testo Name');
