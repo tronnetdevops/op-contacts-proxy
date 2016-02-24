@@ -102,7 +102,7 @@
 				}
 			} else if ($_REQUEST['cb_op_action_import_contact'] && $_REQUEST['user_id']) {
 				// echo dirname(__FILE__) .'/update.txt';
-				file_put_contents( dirname(__FILE__) .'/update.txt', "request recieved!", FILE_APPEND);
+				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL."request recieved!".PHP_EOL, FILE_APPEND);
 				session_start();
 				
 				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
@@ -129,7 +129,7 @@
 					$client->refreshToken($refresh_token);
 					
 				} catch (Exception $e){
-					file_put_contents( dirname(__FILE__) .'/update.txt', "Issues refreshing token: " . $refresh_token, FILE_APPEND);
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL."Issues refreshing token: " . $refresh_token.PHP_EOL, FILE_APPEND);
 					
 					die();
 				}
