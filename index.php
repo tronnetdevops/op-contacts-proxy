@@ -118,6 +118,8 @@
 				$email = $_REQUEST['email'];
 				
 				if (!isset($email) || empty($email) || in_array($email, $currentData)){
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'!!Duplicate!!', FILE_APPEND);
+					
 					die();
 				}
 				
@@ -207,12 +209,17 @@
 		      $entry->appendChild($industry);
 
 	        $xmlToSend = $doc->saveXML();
+					
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Priming request header', FILE_APPEND);
+					
 
 	        $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full');
 	        $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
 	        $req->setRequestMethod('POST');
 	        $req->setPostBody($xmlToSend);
-
+					
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Making request', FILE_APPEND);
+					
 	        $val = $client->getAuth()->authenticatedRequest($req);
 
 	        $response = $val->getResponseBody();
