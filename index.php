@@ -101,7 +101,6 @@
 					}
 				}
 			} else if ($_REQUEST['cb_op_action_import_contact'] && $_REQUEST['user_id']) {
-				// echo dirname(__FILE__) .'/update.txt';
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL."request recieved!".PHP_EOL, FILE_APPEND);
 				session_start();
 				
@@ -140,7 +139,17 @@
 					die();
 				}
 				
-				$ret = OPContactProxy::_create_contact($client, $_REQUEST['fname']." ".$_REQUEST['lname'], $_REQUEST['pnum'], $_REQUEST['email']);
+				$address = false;
+				if ( isset($_REQUEST['address'])
+							&& isset($_REQUEST['city'])
+							&& isset($_REQUEST['state'])
+							&& isset($_REQUEST['zip'])
+							&& isset($_REQUEST['country'])){
+					$address = $_REQUEST['address'] . (isset($_REQUEST['address2']) ? PHP_EOL.$_REQUEST['address2'] : '')
+						. PHP_EOL . $_REQUEST['city'] . ', ' . $_REQUEST['state'] . ' ' .  $_REQUEST['zip'];
+				}
+				
+				$ret = OPContactProxy::_create_contact($client, $_REQUEST['fname']." ".$_REQUEST['lname'], $_REQUEST['email'], $_REQUEST['pnum'], $address);
 				
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 				
@@ -175,7 +184,7 @@
 
 		}
 		
-		static private function _create_contact($client, $name, $phoneNumber, $emailAddress) {
+		static private function _create_contact($client, $name, $emailAddress, $phoneNumber, $address) {
 	        $doc = new DOMDocument();
 	        $doc->formatOutput = true;
 	        $entry = $doc->createElement('atom:entry');
@@ -200,9 +209,14 @@
 						$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
 		        $entry->appendChild($contact);
 					}
+					
+					if ($address){
+						$postalAddress = $doc->createElement('gd:postalAddress', $address);
+						$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+		        $entry->appendChild($postalAddress);					
+					}
 			
 		      $industry = $doc->createElement('gd:organization');
-					// $industry->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
 					$industry->setAttribute('label', 'Industry');
 					$industry->setAttribute('primary', 'true');
 
