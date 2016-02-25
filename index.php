@@ -283,7 +283,7 @@
       $doc->appendChild($entry);
 
       $title = $doc->createElement('title', $name);
-      $entry->appendChild($name);
+      $entry->appendChild($title);
 		
 			
       $opFlag = $doc->createElement('gd:extendedProperty');
