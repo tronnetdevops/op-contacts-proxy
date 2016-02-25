@@ -230,8 +230,13 @@
 						
 						self::save_data($dataKey, $saveData);
 					}
+					
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Cool that handles that contact!'.PHP_EOL, FILE_APPEND);
+					
 				}
 
+				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'All accounts have been updated!'.PHP_EOL, FILE_APPEND);
+				
 				
 				die();
 			}
