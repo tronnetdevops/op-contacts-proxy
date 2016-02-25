@@ -64,6 +64,10 @@
 				$auth_url = $client->createAuthUrl();
 				$auth_url .= '&state=cb_op_action_oauth_NONCE_'.$nonce;
 				
+				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Got request to authorize: '.$_SESSION[ $nonce ].PHP_EOL, FILE_APPEND);
+				
+				die();
+				
 				header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
 				die();
 			} else if (isset($_GET['state'])){
