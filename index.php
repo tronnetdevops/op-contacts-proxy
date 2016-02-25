@@ -185,6 +185,8 @@
 					$title = $_REQUEST['title'];
 					$referral = $_REQUEST['referral'];
 					$manager = $_REQUEST['manager'];
+					$url = $_REQUEST['url'];
+					$birthday = date('Y-m-d', strtotime($_REQUEST['birthday']) );
 					$comments = ""
 						
 					if (!empty($_REQUEST['industry'])){
@@ -204,14 +206,14 @@
 					if (is_array($existing)){
 						$cid = $existing['id'];
 						
-						$ret = OPContactProxy::_create_contact($client, $cid, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $referral, $manager);
+						$ret = OPContactProxy::_create_contact($client, $cid, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager);
 						
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 						
 					} else {
 						$cid = false;
 						
-						$ret = OPContactProxy::_create_contact($client, $cid, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $referral, $manager);
+						$ret = OPContactProxy::_create_contact($client, $cid, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager);
 			
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 			
@@ -381,7 +383,7 @@
 			return OPContactProxy::xml2array($xmlContact);
 		}
 		
-		static private function _create_contact($client, $cid, $name, $emailAddress, $phoneNumber, $industryGroup, $address, $comments, $company, $title, $referral, $manager) {
+		static private function _create_contact($client, $cid, $name, $emailAddress, $phoneNumber, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager) {
       $doc = new DOMDocument();
       $doc->formatOutput = true;
       $entry = $doc->createElement('atom:entry');
@@ -437,6 +439,20 @@
 	      $ref->setAttribute('name', 'manager');
 	      $ref->setAttribute('value', $manager);
 	      $entry->appendChild($ref);
+			}
+			
+			if (!empty($birthday)){
+	      $bday = $doc->createElement('gContact:birthday');
+	      $bday->setAttribute('when', $birthday);
+	      $entry->appendChild($bday);
+			}
+			
+			if (!empty($url)){
+	      $website = $doc->createElement('gContact:website');
+	      $website->setAttribute('href', $url);
+				$website->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+				$website->setAttribute('primary', 'true');
+	      $entry->appendChild($website);
 			}
 			
 			if (!empty($company) || !empty($title)){
