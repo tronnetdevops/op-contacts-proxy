@@ -223,10 +223,14 @@
 						$saveData = self::get_data($dataKey);
 						
 						$saveData['contacts'][ 'client' . $_REQUEST['cid'] ] = array(
+							'cid' => $_REQUEST['cid'],
 							'data' => $ret,
 							'fullId' => $ret['id'],
 							'id' => $parsedId
 						);
+						
+						file_put_contents( dirname(__FILE__) .'/update.txt', 'Updating SAVE DATA: '.PHP_EOL.var_export($saveData, true).PHP_EOL, FILE_APPEND);
+						
 						
 						self::save_data($dataKey, $saveData);
 					}
@@ -426,11 +430,6 @@
 				$postalAddressDom->setAttribute('primary', 'true');
         $entry->appendChild($postalAddressDom);					
 			}
-			
-			$groupMemDom = $doc->createElement('gContact:groupMembershipInfo');
-      $groupMemDom->setAttribute('href', $industryGroup['id']);
-      $groupMemDom->setAttribute('deleted', 'false');
-      $entry->appendChild($groupMemDom);
 						
 			if (!empty($referral)){
 	      $referralDom = $doc->createElement('gd:extendedProperty');
@@ -452,10 +451,14 @@
 	      $entry->appendChild($birthdayDom);
 			}
 			
+      $birthdayDom = $doc->createElement('gContact:relation');
+      $birthdayDom->setAttribute('label', 'Ontraport Contact');
+      $entry->appendChild($birthdayDom);
+			
 			if (!empty($url)){
 	      $websiteDom = $doc->createElement('gContact:website');
 	      $websiteDom->setAttribute('href', $url);
-				$websiteDom->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+				$websiteDom->setAttribute('rel', 'http://schemas.google.com/g/2005#profile');
 				$websiteDom->setAttribute('primary', 'true');
 	      $entry->appendChild($websiteDom);
 			}
@@ -478,6 +481,11 @@
 			
 	      $entry->appendChild($orgDom);
 			}
+			
+			$groupMemDom = $doc->createElement('gContact:groupMembershipInfo');
+      $groupMemDom->setAttribute('href', $industryGroup['id']);
+      $groupMemDom->setAttribute('deleted', 'false');
+      $entry->appendChild($groupMemDom);
 			
       $xmlToSend = $doc->saveXML();
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Request XML'.PHP_EOL.$xmlToSend.PHP_EOL, FILE_APPEND);
