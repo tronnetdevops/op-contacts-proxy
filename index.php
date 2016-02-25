@@ -118,7 +118,7 @@
 						die();
 					}
 				}
-			} else if ($_REQUEST['cb_op_action_import_contact'] && $_REQUEST['user_id']) {
+			} else if ($_REQUEST['cb_op_action_import_contact'] && $_REQUEST['owner']) {
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL."request recieved!".PHP_EOL, FILE_APPEND);
 				session_start();
 				
@@ -133,6 +133,8 @@
 				$owner = trim(strtolower($_REQUEST['owner']));
 				$dataKey = "cb_op_".$owner;
 				$saveData = self::get_data($dataKey);
+				
+				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'CURRENT SAVE DATA:'.PHP_EOL.var_export( $saveData,true).PHP_EOL, FILE_APPEND);
 				
 				$client = new Google_Client();
 				$client->setApplicationName("OP Contacts Proxy");
@@ -152,9 +154,6 @@
 						
 						continue;
 					}
-					
-					var_dump( $saveData );
-					die();
 					
 					$ret = OPContactProxy::_get_contact_groups();
 				
