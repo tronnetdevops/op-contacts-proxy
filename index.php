@@ -209,6 +209,25 @@
 		public function myplugin_deactivate() {
 
 		}
+		
+		public static function xml2array($xml)
+		{
+		    $arr = array();
+ 
+		    foreach ($xml->children() as $r)
+		    {
+		        $t = array();
+		        if(count($r->children()) == 0)
+		        {
+		            $arr[$r->getName()] = strval($r);
+		        }
+		        else
+		        {
+		            $arr[$r->getName()][] = xml2array($r);
+		        }
+		    }
+		    return $arr;
+		}
 
 		static private function _get_contact_groups($client) {
 			
@@ -228,6 +247,14 @@
 			}
 			
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'===RESPONSE==='.PHP_EOL.$response.PHP_EOL.PHP_EOL, FILE_APPEND);
+			
+      $xmlContact = simplexml_load_string($response);
+      $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
+			
+			$groups = self::xml2array($xmlContact);
+			
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'>>>>PARSED<<<<'.PHP_EOL.$groups.PHP_EOL.PHP_EOL, FILE_APPEND);
 			
 		}
 		
