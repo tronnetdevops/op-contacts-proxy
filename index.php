@@ -253,8 +253,7 @@
 			
 			$groups = self::xml2array($xmlContact);
 			
-			
-			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'>>>>PARSED<<<<'.PHP_EOL.$groups.PHP_EOL.PHP_EOL, FILE_APPEND);
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'>>>>PARSED<<<<'.PHP_EOL.var_export($groups, true).PHP_EOL.PHP_EOL, FILE_APPEND);
 			
 		}
 		
