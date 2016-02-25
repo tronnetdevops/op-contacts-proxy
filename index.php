@@ -91,7 +91,7 @@
 						$dataKey = "cb_op_".$owner;
 						$saveData = self::get_data($dataKey);
 						
-						$saveData['access_tokens'][ $_GET['code'] ] => array(
+						$saveData['access_tokens'][ $_GET['code'] ] = array(
 							'code' => $_GET['code'],
 							'refresh_token' => $access_token_decoded['refresh_token'],
 							'access_token' => $access_token
