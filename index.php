@@ -205,15 +205,17 @@
 					$existing = $saveData['contacts'][ 'client' . $_REQUEST['cid'] ];
 					if (is_array($existing)){
 						$cid = $existing['id'];
+						$id = $existing['fullId'];
 						
-						$ret = OPContactProxy::_create_contact($client, $cid, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager);
+						$ret = OPContactProxy::_create_contact($client, $cid, $id, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager);
 						
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 						
 					} else {
 						$cid = false;
+						$id = false;
 						
-						$ret = OPContactProxy::_create_contact($client, $cid, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager);
+						$ret = OPContactProxy::_create_contact($client, $cid, $id, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager);
 			
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 			
@@ -392,7 +394,7 @@
 			return OPContactProxy::xml2array($xmlContact);
 		}
 		
-		static private function _create_contact($client, $cid, $name, $emailAddress, $phoneNumber, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager) {
+		static private function _create_contact($client, $cid, $id, $name, $emailAddress, $phoneNumber, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager) {
       $doc = new DOMDocument();
       $doc->formatOutput = true;
       $entry = $doc->createElement('atom:entry');
@@ -401,7 +403,12 @@
       $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:gd', 'http://schemas.google.com/g/2005');
       $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:gContact', 'http://schemas.google.com/contact/2008');
       $doc->appendChild($entry);
-
+			
+			if ($id !== false){
+				$idDom = $doc->createElement('id', $id);
+	      $entry->appendChild($idDom);
+			}
+			
 			$categoryDom = $doc->createElement('category');
       $categoryDom->setAttribute('term', 'user-tag');
       $categoryDom->setAttribute('label', $industryGroup['title']);
