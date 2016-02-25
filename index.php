@@ -59,7 +59,7 @@
 				
 				$nonce = session_id();
 				$_SESSION['cb_op_nonce'] = $nonce;
-				$_SESSION[ $nonce ] = $_REQUEST['owner'];
+				$_SESSION[ $nonce ] = trim(strtolower($_REQUEST['owner']));
 				
 				$auth_url = $client->createAuthUrl();
 				$auth_url .= '&state=cb_op_action_oauth_NONCE_'.$nonce;
@@ -87,7 +87,7 @@
 						$access_token = $client->getAccessToken();
 						$access_token_decoded = json_decode($access_token, true);
 
-						$owner = $_SESSION[ $nonce ];
+						$owner = trim(strtolower($_SESSION[ $nonce ]));
 
 						$dataKey = "cb_op_".$owner;
 						$saveData = self::get_data($dataKey);
@@ -119,7 +119,7 @@
 			
 				require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
 				
-				$owner = $_REQUEST['owner'];
+				$owner = trim(strtolower($_REQUEST['owner']));
 				$dataKey = "cb_op_".$owner;
 				$saveData = self::get_data($dataKey);
 				
