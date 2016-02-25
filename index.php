@@ -223,7 +223,7 @@
 		        }
 		        else
 		        {
-		            $arr[$r->getName()][] = xml2array($r);
+		            $arr[$r->getName()][] = OPContactProxy::xml2array($r);
 		        }
 		    }
 		    return $arr;
