@@ -150,11 +150,23 @@
 						continue;
 					}
 					
-					$ret = OPContactProxy::_get_contact_groups($client);
-				
-					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
-				
-					die();
+					$groups = OPContactProxy::_get_contact_groups($client);
+					
+					$industryGroup = false;
+					
+					if (isset($_REQUEST['industry'])){
+						foreach($groups['entry'] as $group){
+							if (strpos($group['title'], $_REQUEST['industry']) !== false){
+								$industryGroup = $group;
+							}
+						}
+					}
+						
+					if (!$industryGroup){						
+						$industryGroup = OPContactProxy::_create_contact_group($client, $_REQUEST['industry']);
+					}
+					
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Found matching Industry Group: '.var_export($industryGroup, true).PHP_EOL, FILE_APPEND);
 				
 					$address = false;
 					if ( isset($_REQUEST['address'])
@@ -170,7 +182,7 @@
 					$name = $_REQUEST['fname'] . (!empty($_REQUEST['mname']) ? " " . $_REQUEST['mname'] : "")." ".$_REQUEST['lname'];
 					$email = $_REQUEST['email'];
 				
-					$ret = OPContactProxy::_create_contact($name, $_REQUEST['email'], $_REQUEST['pnum'], $_REQUEST['industry'], $address, $comments);
+					$ret = OPContactProxy::_create_contact($name, $_REQUEST['email'], $_REQUEST['pnum'], $industryGroup, $address, $comments);
 				
 					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 				
@@ -255,113 +267,132 @@
 			
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'>>>>PARSED<<<<'.PHP_EOL.var_export($groups, true).PHP_EOL.PHP_EOL, FILE_APPEND);
 			
+			return $groups;
 		}
 		
-		static private function _create_contact($client, $name, $emailAddress, $phoneNumber, $address) {
-	        $doc = new DOMDocument();
-	        $doc->formatOutput = true;
-	        $entry = $doc->createElement('atom:entry');
-	        $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:atom', 'http://www.w3.org/2005/Atom');
-	        $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:gd', 'http://schemas.google.com/g/2005');
-	        $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:gd', 'http://schemas.google.com/g/2005');
-	        $doc->appendChild($entry);
-
-	        $title = $doc->createElement('title', $name);
-	        $entry->appendChild($title);
-					
-	        $content = $doc->createElement('content', 'some content right here');
-	        $entry->appendChild($content);
-					
-	        $email = $doc->createElement('gd:email');
-	        $email->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
-	        $email->setAttribute('address', $emailAddress);
-	        $entry->appendChild($email);
+		static private function _create_contact_group($client, $name) {
 			
-					if ($phoneNumber){
-						$contact = $doc->createElement('gd:phoneNumber', $phoneNumber);
-						$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
-		        $entry->appendChild($contact);
-					}
-					
-					if ($address){
-						$postalAddress = $doc->createElement('gd:postalAddress', $address);
-						$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
-		        $entry->appendChild($postalAddress);					
-					}
-					
-	        $industry = $doc->createElement('gd:extendedProperty');
-	        $industry->setAttribute('name', 'industry');
-	        $industry->setAttribute('value', 'coolInc');
-		      $entry->appendChild($industry);
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'No matching industry group, making a new one: '.PHP_EOL, FILE_APPEND);
 			
-		      $industry = $doc->createElement('gd:organization');
-					$industry->setAttribute('label', 'Industry');
-					$industry->setAttribute('primary', 'true');
+      $doc = new DOMDocument();
+      $doc->formatOutput = true;
+      $entry = $doc->createElement('atom:entry');
+      $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:atom', 'http://www.w3.org/2005/Atom');
+      $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:gd', 'http://schemas.google.com/g/2005');
+      $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:gd', 'http://schemas.google.com/g/2005');
+      $doc->appendChild($entry);
 
-		      $orgName = $doc->createElement('gd:orgName', 'Some Industry');
-	        $industry->appendChild($orgName);
-		      $orgName = $doc->createElement('gd:orgTitle', 'Some Title');
-	        $industry->appendChild($orgName);
-					
-		      $entry->appendChild($industry);
-					
-					
-
-	        $xmlToSend = $doc->saveXML();
-					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Request XML'.PHP_EOL.$xmlToSend.PHP_EOL, FILE_APPEND);
-					
-					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Priming request header', FILE_APPEND);
-					
-
-	        $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full');
-	        $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
-	        $req->setRequestMethod('POST');
-	        $req->setPostBody($xmlToSend);
-					
-					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Making request', FILE_APPEND);
-					
-	        $val = $client->getAuth()->authenticatedRequest($req);
-
-	        $response = $val->getResponseBody();
-					
-					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'===RESPONSE==='.PHP_EOL.$response.PHP_EOL.PHP_EOL, FILE_APPEND);
-					
-
-	        $xmlContact = simplexml_load_string($response);
-	        $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
-
-	        $xmlContactsEntry = $xmlContact;
-
-	        $contactDetails = array();
-
-	        $contactDetails['id'] = (string) $xmlContactsEntry->id;
-	        $contactDetails['name'] = (string) $xmlContactsEntry->title;
-
-	        foreach ($xmlContactsEntry->children() as $key => $value) {
-	            $attributes = $value->attributes();
-
-	            if ($key == 'link') {
-	                if ($attributes['rel'] == 'edit') {
-	                    $contactDetails['editURL'] = (string) $attributes['href'];
-	                } elseif ($attributes['rel'] == 'self') {
-	                    $contactDetails['selfURL'] = (string) $attributes['href'];
-	                }
-	            }
-	        }
-
-	        $contactGDNodes = $xmlContactsEntry->children('http://schemas.google.com/g/2005');
-
-	        foreach ($contactGDNodes as $key => $value) {
-	            $attributes = $value->attributes();
-
-	            if ($key == 'email') {
-	                $contactDetails[$key] = (string) $attributes['address'];
-	            } else {
-	                $contactDetails[$key] = (string) $value;
-	            }
-	        }
+      $title = $doc->createElement('title', $name);
+      $entry->appendChild($name);
+		
 			
-			return $contactDetails;
+      $opFlag = $doc->createElement('gd:extendedProperty');
+      $opFlag->setAttribute('name', 'op-generated');
+      $opFlag->setAttribute('value', 'true');
+      $opFlag->appendChild($industry);
+
+      $xmlToSend = $doc->saveXML();
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Request XML'.PHP_EOL.$xmlToSend.PHP_EOL, FILE_APPEND);
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Priming request header', FILE_APPEND);
+
+      $req = new Google_Http_Request('https://www.google.com/m8/feeds/groups/default/full');
+      $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
+      $req->setRequestMethod('POST');
+      $req->setPostBody($xmlToSend);
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Making request', FILE_APPEND);
+			
+      $val = $client->getAuth()->authenticatedRequest($req);
+
+      $response = $val->getResponseBody();
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'===RESPONSE==='.PHP_EOL.$response.PHP_EOL.PHP_EOL, FILE_APPEND);
+			
+
+      $xmlContact = simplexml_load_string($response);
+      $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
+
+			return OPContactProxy::xml2array($xmlContact);
+		}
+		
+		static private function _create_contact($client, $name, $emailAddress, $phoneNumber, $industryGroup, $address, $comments) {
+      $doc = new DOMDocument();
+      $doc->formatOutput = true;
+      $entry = $doc->createElement('atom:entry');
+      $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:atom', 'http://www.w3.org/2005/Atom');
+      $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:gd', 'http://schemas.google.com/g/2005');
+      $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:gd', 'http://schemas.google.com/g/2005');
+      $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:gContact', 'http://schemas.google.com/contact/2008');
+      $doc->appendChild($entry);
+
+      $title = $doc->createElement('title', $name);
+      $entry->appendChild($title);
+			
+      $content = $doc->createElement('content', $comments);
+      $entry->appendChild($content);
+			
+      $email = $doc->createElement('gd:email');
+      $email->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+      $email->setAttribute('address', $emailAddress);
+      $entry->appendChild($email);
+	
+			if ($phoneNumber){
+				$contact = $doc->createElement('gd:phoneNumber', $phoneNumber);
+				$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+        $entry->appendChild($contact);
+			}
+			
+			if ($address){
+				$postalAddress = $doc->createElement('gd:postalAddress', $address);
+				$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+        $entry->appendChild($postalAddress);					
+			}
+			
+			$industry = $doc->createElement('gContact:groupMembershipInfo');
+      $industry->setAttribute('href', $industryGroup['id']);
+      $industry->setAttribute('deleted', 'false');
+			
+			
+			//       $industry = $doc->createElement('gd:extendedProperty');
+			//       $industry->setAttribute('name', 'industry');
+			//       $industry->setAttribute('value', 'coolInc');
+			//       $entry->appendChild($industry);
+			//
+			//       $industry = $doc->createElement('gd:organization');
+			// $industry->setAttribute('label', 'Industry');
+			// $industry->setAttribute('primary', 'true');
+			//
+			//       $orgName = $doc->createElement('gd:orgName', 'Some Industry');
+			//       $industry->appendChild($orgName);
+			//       $orgName = $doc->createElement('gd:orgTitle', 'Some Title');
+			//       $industry->appendChild($orgName);
+			
+      $entry->appendChild($industry);
+			
+      $xmlToSend = $doc->saveXML();
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Request XML'.PHP_EOL.$xmlToSend.PHP_EOL, FILE_APPEND);
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Priming request header', FILE_APPEND);
+			
+
+      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full');
+      $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
+      $req->setRequestMethod('POST');
+      $req->setPostBody($xmlToSend);
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Making request', FILE_APPEND);
+			
+      $val = $client->getAuth()->authenticatedRequest($req);
+
+      $response = $val->getResponseBody();
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'===RESPONSE==='.PHP_EOL.$response.PHP_EOL.PHP_EOL, FILE_APPEND);
+			
+      $xmlContact = simplexml_load_string($response);
+      $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
+
+			return OPContactProxy::xml2array($xmlContact);
 		}
 
 	}
