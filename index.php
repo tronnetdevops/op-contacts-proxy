@@ -224,7 +224,7 @@
       	$response = $val->getResponseBody();
 			} catch (Exception $e){
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL."Error getting groups: " .PHP_EOL. var_export($e, true).PHP_EOL, FILE_APPEND);
-				return
+				return;
 			}
 			
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'===RESPONSE==='.PHP_EOL.$response.PHP_EOL.PHP_EOL, FILE_APPEND);
