@@ -210,7 +210,7 @@
 
 		}
 		
-		public static function xml2array($xml)
+		static public function xml2array($xml)
 		{
 		    $arr = array();
  
