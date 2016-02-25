@@ -465,11 +465,13 @@
 				$org->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
 				$org->setAttribute('primary', 'true');
 			
-				if (!empty($company)){
+				if (isset($company) && !empty($company)){
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Company: '.PHP_EOL.$company.PHP_EOL, FILE_APPEND);
 		      $orgName = $doc->createElement('gd:orgName', $company);
 		      $org->appendChild($orgName);
 				}
-				if (!empty($title)){
+				if (isset($title) && !empty($title)){
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Title: '.PHP_EOL.$title.PHP_EOL, FILE_APPEND);
 		      $orgName = $doc->createElement('gd:orgTitle', $title);
 		      $org->appendChild($orgName);
 				}
