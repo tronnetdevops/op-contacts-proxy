@@ -117,9 +117,9 @@
 				$email = $_REQUEST['email'];
 				
 				if (!isset($email) || empty($email) || in_array($email, $currentData)){
-					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'!!Duplicate!!', FILE_APPEND);
-					
-					die();
+					// file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'!!Duplicate!!', FILE_APPEND);
+					//
+					// die();
 				}
 				
 				$client = new Google_Client();
@@ -139,6 +139,12 @@
 					die();
 				}
 				
+				$ret = OPContactProxy::_get_contact_groups();
+				
+				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
+				
+				die();
+				
 				$address = false;
 				if ( isset($_REQUEST['address'])
 							&& isset($_REQUEST['city'])
@@ -149,11 +155,18 @@
 						. PHP_EOL . $_REQUEST['city'] . ', ' . $_REQUEST['state'] . ' ' .  $_REQUEST['zip'];
 				}
 				
-				$ret = OPContactProxy::_create_contact($client, $_REQUEST['fname']." ".$_REQUEST['lname'], $_REQUEST['email'], $_REQUEST['pnum'], $address);
+				$comments = "Industry: "$_REQUEST['industry'].PHP_EOL.PHP_EOL.$_REQUEST['notes'];
+				$name = $client, $_REQUEST['fname'] (!empty($_REQUEST['mname']) ? " " . $_REQUEST['mname'] : "")." ".$_REQUEST['lname'];
+				
+				$ret = OPContactProxy::_create_contact($name, $_REQUEST['email'], $_REQUEST['pnum'], $_REQUEST['industry'], $address, $comments);
 				
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 				
-				$currentData[] = $email;
+				$currentData[ 'client' . $_REQUEST['cid'] ] = array(
+					'email' => $email,
+					'name' => $name,
+					'id' => $ret['id']
+				);
 				
 				self::save_data("cb_op_emails_saved", $currentData);
 				
@@ -182,6 +195,22 @@
 		
 		public function myplugin_deactivate() {
 
+		}
+
+		static private function _get_contact_groups($client) {
+			
+      $req = new Google_Http_Request('https://www.google.com/m8/feeds/groups/default/full');
+      $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
+      $req->setRequestMethod('GET');
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Making request', FILE_APPEND);
+			
+      $val = $client->getAuth()->authenticatedRequest($req);
+
+      $response = $val->getResponseBody();
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'===RESPONSE==='.PHP_EOL.$response.PHP_EOL.PHP_EOL, FILE_APPEND);
+			
 		}
 		
 		static private function _create_contact($client, $name, $emailAddress, $phoneNumber, $address) {
@@ -215,6 +244,11 @@
 						$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
 		        $entry->appendChild($postalAddress);					
 					}
+					
+	        $industry = $doc->createElement('gd:extendedProperty');
+	        $industry->setAttribute('name', 'industry');
+	        $industry->setAttribute('value', 'coolInc');
+		      $entry->appendChild($industry);
 			
 		      $industry = $doc->createElement('gd:organization');
 					$industry->setAttribute('label', 'Industry');
@@ -226,6 +260,8 @@
 	        $industry->appendChild($orgName);
 					
 		      $entry->appendChild($industry);
+					
+					
 
 	        $xmlToSend = $doc->saveXML();
 					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Request XML'.PHP_EOL.$xmlToSend.PHP_EOL, FILE_APPEND);
