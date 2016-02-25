@@ -69,6 +69,11 @@
 			} else if (isset($_GET['state'])){
 				$action = explode('_NONCE_', $_GET['state']);
 				if ($action[0] == 'cb_op_action_oauth'){
+					session_start();
+					
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'Got a nonce return: '.$_GET['state'].PHP_EOL, FILE_APPEND);
+					file_put_contents( dirname(__FILE__) .'/update.txt', 'Comparing against: '.$_SESSION['cb_op_nonce'].PHP_EOL, FILE_APPEND);
+					
 					$nonce = $action[1];
 			
 					if ($nonce == $_SESSION['cb_op_nonce']) {
@@ -98,12 +103,15 @@
 							'access_token' => $access_token
 						);
 						
+						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Adding in new access token to user data with key: '.$dataKey.PHP_EOL, FILE_APPEND);
+						file_put_contents( dirname(__FILE__) .'/update.txt', var_export( $saveData,true).PHP_EOL, FILE_APPEND);
+						
 						self::save_data($dataKey, $saveData);
 						
 						include( dirname(__FILE__) . '/templates/create-user-success.php' );
 						die();
 					} else {
-						echo "There was an error parsing your user nonce. Maybe the network timedout?";
+						echo "There was an error parsing your user nonce. Maybe the network experienced a timeout?";
 						die();
 					}
 				}
