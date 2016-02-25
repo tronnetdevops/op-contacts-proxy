@@ -398,87 +398,86 @@
       $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:gContact', 'http://schemas.google.com/contact/2008');
       $doc->appendChild($entry);
 
-			$category = $doc->createElement('category');
-      $category->setAttribute('term', 'user-tag');
-      $category->setAttribute('label', $industryGroup['title']);
-      $entry->appendChild($category);
+			$categoryDom = $doc->createElement('category');
+      $categoryDom->setAttribute('term', 'user-tag');
+      $categoryDom->setAttribute('label', $industryGroup['title']);
+      $entry->appendChild($categoryDom);
 			
-      $title = $doc->createElement('title', $name);
-      $entry->appendChild($title);
+      $titleDom = $doc->createElement('title', $name);
+      $entry->appendChild($titleDom);
 			
-      $content = $doc->createElement('content', $comments);
-      $entry->appendChild($content);
+      $contentDom = $doc->createElement('content', $comments);
+      $entry->appendChild($contentDom);
 			
-      $email = $doc->createElement('gd:email');
-      $email->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
-      $email->setAttribute('address', $emailAddress);
-      $entry->appendChild($email);
+      $emailDom = $doc->createElement('gd:email');
+      $emailDom->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+      $emailDom->setAttribute('address', $emailAddress);
+      $entry->appendChild($emailDom);
 	
 			if (!empty($phoneNumber)){
-				$contact = $doc->createElement('gd:phoneNumber', $phoneNumber);
-				$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
-        $entry->appendChild($contact);
+				$phoneNumberDom = $doc->createElement('gd:phoneNumber', $phoneNumber);
+				$phoneNumberDom->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+        $entry->appendChild($phoneNumberDom);
 			}
 			
 			if (!empty($address)){
-				$postalAddress = $doc->createElement('gd:postalAddress', $address);
-				$postalAddress->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
-				$postalAddress->setAttribute('primary', 'true');
-        $entry->appendChild($postalAddress);					
+				$postalAddressDom = $doc->createElement('gd:postalAddress', $address);
+				$postalAddressDom->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+				$postalAddressDom->setAttribute('primary', 'true');
+        $entry->appendChild($postalAddressDom);					
 			}
 			
-			$industry = $doc->createElement('gContact:groupMembershipInfo');
-      $industry->setAttribute('href', $industryGroup['id']);
-      $industry->setAttribute('deleted', 'false');
-      $entry->appendChild($industry);
+			$groupMemDom = $doc->createElement('gContact:groupMembershipInfo');
+      $groupMemDom->setAttribute('href', $industryGroup['id']);
+      $groupMemDom->setAttribute('deleted', 'false');
+      $entry->appendChild($groupMemDom);
 						
 			if (!empty($referral)){
-	      $ref = $doc->createElement('gd:extendedProperty');
-	      $ref->setAttribute('name', 'referral');
-	      $ref->setAttribute('value', $referral);
-	      $entry->appendChild($ref);
+	      $referralDom = $doc->createElement('gd:extendedProperty');
+	      $referralDom->setAttribute('name', 'referral');
+	      $referralDom->setAttribute('value', $referral);
+	      $entry->appendChild($referralDom);
 			}
 
 			if (!empty($manager)){
-	      $ref = $doc->createElement('gd:extendedProperty');
-	      $ref->setAttribute('name', 'manager');
-	      $ref->setAttribute('value', $manager);
-	      $entry->appendChild($ref);
+	      $managerDom = $doc->createElement('gd:extendedProperty');
+	      $managerDom->setAttribute('name', 'manager');
+	      $managerDom->setAttribute('value', $manager);
+	      $entry->appendChild($managerDom);
 			}
 			
 			if (!empty($birthday)){
-	      $bday = $doc->createElement('gContact:birthday');
-	      $bday->setAttribute('when', $birthday);
-	      $entry->appendChild($bday);
+	      $birthdayDom = $doc->createElement('gContact:birthday');
+	      $birthdayDom->setAttribute('when', $birthday);
+	      $entry->appendChild($birthdayDom);
 			}
 			
 			if (!empty($url)){
-	      $website = $doc->createElement('gContact:website');
-	      $website->setAttribute('href', $url);
-				$website->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
-				$website->setAttribute('primary', 'true');
-	      $entry->appendChild($website);
+	      $websiteDom = $doc->createElement('gContact:website');
+	      $websiteDom->setAttribute('href', $url);
+				$websiteDom->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+				$websiteDom->setAttribute('primary', 'true');
+	      $entry->appendChild($websiteDom);
 			}
 			
 			if (!empty($company) || !empty($title)){
-	      $org = $doc->createElement('gd:organization');
-				$org->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
-				$org->setAttribute('primary', 'true');
+	      $orgDom = $doc->createElement('gd:organization');
+				$orgDom->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+				$orgDom->setAttribute('primary', 'true');
 			
 				if (isset($company) && !empty($company)){
 					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Company: '.PHP_EOL.var_export($company, true).PHP_EOL, FILE_APPEND);
-		      $orgName = $doc->createElement('gd:orgName', $company);
-		      $org->appendChild($orgName);
+		      $orgNameDom = $doc->createElement('gd:orgName', $company);
+		      $orgDom->appendChild($orgNameDom);
 				}
 				if (isset($title) && !empty($title)){
 					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Title: '.PHP_EOL.var_export($title, true).PHP_EOL, FILE_APPEND);
-		      $orgName = $doc->createElement('gd:orgTitle', $title);
-		      $org->appendChild($orgName);
+		      $orgTitleDom = $doc->createElement('gd:orgTitle', $title);
+		      $orgDom->appendChild($orgTitleDom);
 				}
 			
-	      $entry->appendChild($org);
+	      $entry->appendChild($orgDom);
 			}
-
 			
       $xmlToSend = $doc->saveXML();
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Request XML'.PHP_EOL.$xmlToSend.PHP_EOL, FILE_APPEND);
