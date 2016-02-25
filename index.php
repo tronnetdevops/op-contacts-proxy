@@ -129,6 +129,7 @@
 				
 				$owner = trim(strtolower($_REQUEST['owner']));
 				$dataKey = "cb_op_".$owner;
+				$clientKey = $code.'-'.$_REQUEST['cid'];
 				$saveData = self::get_data($dataKey);
 				
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'CURRENT SAVE DATA:'.PHP_EOL.var_export( $saveData,true).PHP_EOL, FILE_APPEND);
@@ -202,7 +203,7 @@
 						$comments .= PHP_EOL.PHP_EOL.$_REQUEST['notes'];
 					}
 					
-					$existing = $saveData['contacts'][ 'client' . $_REQUEST['cid'] ];
+					$existing = $saveData['contacts'][ $clientKey ];
 					if (is_array($existing)){
 						$cid = $existing['id'];
 						$id = $existing['fullId'];
@@ -224,7 +225,8 @@
 						
 						$saveData = self::get_data($dataKey);
 						
-						$saveData['contacts'][ 'client' . $_REQUEST['cid'] ] = array(
+						$saveData['contacts'][ $clientKey ] = array(
+							'code' => $code,
 							'cid' => $_REQUEST['cid'],
 							'data' => $ret,
 							'fullId' => $ret['id'],
