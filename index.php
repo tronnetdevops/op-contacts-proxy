@@ -150,7 +150,7 @@
 						continue;
 					}
 					
-					$ret = OPContactProxy::_get_contact_groups();
+					$ret = OPContactProxy::_get_contact_groups($client);
 				
 					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 				
