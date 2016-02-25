@@ -228,6 +228,8 @@
 						
 						$saveData = self::get_data($dataKey);
 						
+						$saveData['contacts'] = array();
+						
 						$saveData['contacts'][ $clientKey ] = array(
 							'code' => $code,
 							'cid' => $_REQUEST['cid'],
@@ -292,7 +294,7 @@
 		            $arr[$r->getName()][] = OPContactProxy::xml2array($r);
 		        }
 		    }
-		    return $arr;
+		    return json_decode(json_encode($xml)); //$arr;
 		}
 		
 		static private function _get_contact($client, $cid) {
