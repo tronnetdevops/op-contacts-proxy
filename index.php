@@ -37,7 +37,6 @@
 		}
 		
 		public function check_for_requests(){
-			error_reporting(-1);
 			
 			if (isset($_GET['op_google_contact_integration'])){
 				include( dirname(__FILE__) . '/templates/create-user.php' );
@@ -122,9 +121,7 @@
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL."request recieved!".PHP_EOL, FILE_APPEND);
 				session_start();
 				
-				
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.var_export($_REQUEST, true).PHP_EOL, FILE_APPEND);
-				
 				
 				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
 			
@@ -142,16 +139,14 @@
 				$client->setRedirectUri('http://wpdemo.tronnet.me/');
 				$client->addScope("https://www.google.com/m8/feeds");
 				
-				foreach($saveData['access_tokens'] as $access_token){
+				foreach($saveData['access_tokens'] as $code=>$access_token){
 
 					$refresh_token = $access_token['refresh_token'];
 				
 					try{
 						$client->refreshToken($refresh_token);
-					
 					} catch (Exception $e){
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL."Issues refreshing token: " . $refresh_token.PHP_EOL, FILE_APPEND);
-						
 						continue;
 					}
 					
@@ -179,21 +174,21 @@
 				
 					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 				
-					$currentData[ 'client' . $_REQUEST['cid'] ] = array(
+					$saveData[ 'client' . $_REQUEST['cid'] ] = array(
 						'email' => $email,
 						'name' => $name,
 						'id' => $ret['id']
 					);
 				}
 
-				self::save_data("cb_op_emails_saved", $currentData);
+				self::save_data("cb_op_emails_saved", $saveData);
 				
 				die();
 			}
 			
 		}
 		
-		public function save_data($key, $data){
+		static public function save_data($key, $data){
 			if ( get_option( $key ) !== false ) {
 			    update_option( $key, $data );
 			} else {
@@ -203,7 +198,7 @@
 			return get_option( $key );
 		}
 		
-		public function get_data($key){
+		static public function get_data($key){
 			return get_option( $key );
 		}
 		
@@ -225,7 +220,12 @@
 			
       $val = $client->getAuth()->authenticatedRequest($req);
 
-      $response = $val->getResponseBody();
+			try{
+      	$response = $val->getResponseBody();
+			} catch (Exception $e){
+				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL."Error getting groups: " .PHP_EOL. var_export($e, true).PHP_EOL, FILE_APPEND);
+				return
+			}
 			
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'===RESPONSE==='.PHP_EOL.$response.PHP_EOL.PHP_EOL, FILE_APPEND);
 			
