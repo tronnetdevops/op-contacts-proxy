@@ -187,15 +187,15 @@
 					$manager = $_REQUEST['manager'];
 					$url = $_REQUEST['url'];
 					$birthday = date('Y-m-d', strtotime($_REQUEST['birthday']) );
-					$comments = ""
+					$comments = "";
 						
 					if (!empty($_REQUEST['industry'])){
 						$comments .= "Industry: ".$_REQUEST['industry'];
 					}
-					if (!empty($manager){
+					if (!empty($manager)){
 						$comments .= PHP_EOL."Manager: ".$manager;
 					}
-					if (!empty($referral){
+					if (!empty($referral)){
 						$comments .= PHP_EOL."Referral: ".$referral;
 					}
 					if (!empty($_REQUEST['notes'])){
