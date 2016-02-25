@@ -181,6 +181,9 @@
 				
 					$name = $_REQUEST['fname'] . (!empty($_REQUEST['mname']) ? " " . $_REQUEST['mname'] : "")." ".$_REQUEST['lname'];
 					$email = $_REQUEST['email'];
+					$workPhone = $_REQUEST['wnum'];
+					$cellPhone = $_REQUEST['cnum'];
+					$faxPhone = $_REQUEST['fnum'];
 					$phone = $_REQUEST['pnum'];
 					$company = $_REQUEST['company'];
 					$title = $_REQUEST['title'];
@@ -208,7 +211,7 @@
 						$cid = $existing['id'];
 						$id = $existing['fullId'];
 						
-						$ret = OPContactProxy::_create_contact($client, $cid, $id, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager);
+						$ret = OPContactProxy::_create_contact($client, $cid, $id, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager, $workPhone, $cellPhone, $faxPhone);
 						
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 						
@@ -216,7 +219,7 @@
 						$cid = false;
 						$id = false;
 						
-						$ret = OPContactProxy::_create_contact($client, $cid, $id, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager);
+						$ret = OPContactProxy::_create_contact($client, $cid, $id, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager, $workPhone, $cellPhone, $faxPhone);
 			
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 			
@@ -396,7 +399,7 @@
 			return OPContactProxy::xml2array($xmlContact);
 		}
 		
-		static private function _create_contact($client, $cid, $id, $name, $emailAddress, $phoneNumber, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager) {
+		static private function _create_contact($client, $cid, $id, $name, $emailAddress, $phoneNumber, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager, $workPhone, $cellPhone, $faxPhone) {
       $doc = new DOMDocument();
       $doc->formatOutput = true;
       $entry = $doc->createElement('atom:entry');
@@ -429,7 +432,26 @@
 	
 			if (!empty($phoneNumber)){
 				$phoneNumberDom = $doc->createElement('gd:phoneNumber', $phoneNumber);
+				$phoneNumberDom->setAttribute('rel', 'http://schemas.google.com/g/2005#main');
+				$phoneNumberDom->setAttribute('primary', 'true');
+        $entry->appendChild($phoneNumberDom);
+			}
+			
+			if (!empty($workPhone)){
+				$phoneNumberDom = $doc->createElement('gd:phoneNumber', $workPhone);
 				$phoneNumberDom->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+        $entry->appendChild($phoneNumberDom);
+			}
+			
+			if (!empty($cellPhone)){
+				$phoneNumberDom = $doc->createElement('gd:phoneNumber', $cellPhone);
+				$phoneNumberDom->setAttribute('rel', 'http://schemas.google.com/g/2005#mobile');
+        $entry->appendChild($phoneNumberDom);
+			}
+			
+			if (!empty($faxPhone)){
+				$phoneNumberDom = $doc->createElement('gd:phoneNumber', $faxPhone);
+				$phoneNumberDom->setAttribute('rel', 'http://schemas.google.com/g/2005#fax');
         $entry->appendChild($phoneNumberDom);
 			}
 			
