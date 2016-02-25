@@ -345,7 +345,8 @@
 			
 			if (!empty($address)){
 				$postalAddress = $doc->createElement('gd:postalAddress', $address);
-				$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+				$postalAddress->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+				$postalAddress->setAttribute('primary', 'true');
         $entry->appendChild($postalAddress);					
 			}
 			
