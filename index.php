@@ -182,7 +182,7 @@
 					$name = $_REQUEST['fname'] . (!empty($_REQUEST['mname']) ? " " . $_REQUEST['mname'] : "")." ".$_REQUEST['lname'];
 					$email = $_REQUEST['email'];
 				
-					$ret = OPContactProxy::_create_contact($name, $_REQUEST['email'], $_REQUEST['pnum'], $industryGroup, $address, $comments);
+					$ret = OPContactProxy::_create_contact($client, $name, $_REQUEST['email'], $_REQUEST['pnum'], $industryGroup, $address, $comments);
 				
 					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
 				
