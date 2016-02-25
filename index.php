@@ -37,6 +37,7 @@
 		}
 		
 		public function check_for_requests(){
+			error_reporting(-1);
 			
 			if (isset($_GET['op_google_contact_integration'])){
 				include( dirname(__FILE__) . '/templates/create-user.php' );
