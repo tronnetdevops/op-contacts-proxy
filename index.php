@@ -495,13 +495,19 @@
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'%%%% Priming UPDATE request header with CID: ' . $cid, FILE_APPEND);
 				
 	      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full/'.$cid);
+				
+	      $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
+	      $req->setRequestMethod('PUT');
+	      $req->setPostBody($xmlToSend);
 			} else {
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'++++ Priming CREATE request header', FILE_APPEND);
 	      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full');
+				
+	      $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
+	      $req->setRequestMethod('POST');
+	      $req->setPostBody($xmlToSend);
 			}
-      $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
-      $req->setRequestMethod('POST');
-      $req->setPostBody($xmlToSend);
+
 			
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Making request', FILE_APPEND);
 			
