@@ -289,7 +289,7 @@
       $opFlag = $doc->createElement('gd:extendedProperty');
       $opFlag->setAttribute('name', 'op-generated');
       $opFlag->setAttribute('value', 'true');
-      $opFlag->appendChild($opFlag);
+      $entry->appendChild($opFlag);
 
       $xmlToSend = $doc->saveXML();
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Request XML'.PHP_EOL.$xmlToSend.PHP_EOL, FILE_APPEND);
