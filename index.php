@@ -178,22 +178,58 @@
 							. PHP_EOL . $_REQUEST['city'] . ', ' . $_REQUEST['state'] . ' ' .  $_REQUEST['zip'];
 					}
 				
-					$comments = "Industry: ".$_REQUEST['industry'].PHP_EOL.PHP_EOL.$_REQUEST['notes'];
 					$name = $_REQUEST['fname'] . (!empty($_REQUEST['mname']) ? " " . $_REQUEST['mname'] : "")." ".$_REQUEST['lname'];
 					$email = $_REQUEST['email'];
-				
-					$ret = OPContactProxy::_create_contact($client, $name, $_REQUEST['email'], $_REQUEST['pnum'], $industryGroup, $address, $comments);
-				
-					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
-				
-					$saveData[ 'client' . $_REQUEST['cid'] ] = array(
-						'email' => $email,
-						'name' => $name,
-						'id' => $ret['id']
-					);
+					$phone = $_REQUEST['pnum'];
+					$company = $_REQUEST['company'];
+					$title = $_REQUEST['title'];
+					$referral = $_REQUEST['referral'];
+					$manager = $_REQUEST['manager'];
+					$comments = ""
+						
+					if (!empty($_REQUEST['industry'])){
+						$comments .= "Industry: ".$_REQUEST['industry'];
+					}
+					if (!empty($manager){
+						$comments .= PHP_EOL."Manager: ".$manager;
+					}
+					if (!empty($referral){
+						$comments .= PHP_EOL."Referral: ".$referral;
+					}
+					if (!empty($_REQUEST['notes'])){
+						$comments .= PHP_EOL.PHP_EOL.$_REQUEST['notes'];
+					}
+					
+					$existing = $saveData['contacts'][ 'client' . $_REQUEST['cid'] ];
+					if (is_array($existing)){
+						$cid = $existing['id'];
+						
+						$ret = OPContactProxy::_create_contact($client, $cid, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $referral, $manager);
+						
+						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
+						
+					} else {
+						$cid = false;
+						
+						$ret = OPContactProxy::_create_contact($client, $cid, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $referral, $manager);
+			
+						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
+			
+						$parsedId = explode('/', $ret['id']);
+						$parsedId = $parsedId[ count($parsedId) - 1 ];
+						
+						$saveData = self::get_data($dataKey);
+						
+						$saveData['contacts'][ 'client' . $_REQUEST['cid'] ] = array(
+							'data' => $ret,
+							'fullId' => $ret['id'],
+							'id' => $parsedId
+						);
+						
+						self::save_data($dataKey, $saveData);
+					}
 				}
 
-				self::save_data("cb_op_emails_saved", $saveData);
 				
 				die();
 			}
@@ -239,6 +275,35 @@
 		        }
 		    }
 		    return $arr;
+		}
+		
+		static private function _get_contact($client, $cid) {
+			
+      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/'.$cid);
+      $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
+      $req->setRequestMethod('GET');
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Making request', FILE_APPEND);
+			
+      $val = $client->getAuth()->authenticatedRequest($req);
+
+			try{
+      	$response = $val->getResponseBody();
+			} catch (Exception $e){
+				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL."Error getting contact: " .PHP_EOL. var_export($e, true).PHP_EOL, FILE_APPEND);
+				return;
+			}
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'===RESPONSE==='.PHP_EOL.$response.PHP_EOL.PHP_EOL, FILE_APPEND);
+			
+      $xmlContact = simplexml_load_string($response);
+      $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
+			
+			$contact = OPContactProxy::xml2array($xmlContact);
+			
+			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'>>>>PARSED<<<<'.PHP_EOL.var_export($contact, true).PHP_EOL.PHP_EOL, FILE_APPEND);
+			
+			return $contact;
 		}
 
 		static private function _get_contact_groups($client) {
@@ -316,7 +381,7 @@
 			return OPContactProxy::xml2array($xmlContact);
 		}
 		
-		static private function _create_contact($client, $name, $emailAddress, $phoneNumber, $industryGroup, $address, $comments) {
+		static private function _create_contact($client, $cid, $name, $emailAddress, $phoneNumber, $industryGroup, $address, $comments, $company, $title, $referral, $manager) {
       $doc = new DOMDocument();
       $doc->formatOutput = true;
       $entry = $doc->createElement('atom:entry');
@@ -326,6 +391,11 @@
       $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:gContact', 'http://schemas.google.com/contact/2008');
       $doc->appendChild($entry);
 
+			$category = $doc->createElement('category');
+      $category->setAttribute('term', 'user-tag');
+      $category->setAttribute('label', $industryGroup['title']);
+      $entry->appendChild($category);
+			
       $title = $doc->createElement('title', $name);
       $entry->appendChild($title);
 			
@@ -353,30 +423,52 @@
 			$industry = $doc->createElement('gContact:groupMembershipInfo');
       $industry->setAttribute('href', $industryGroup['id']);
       $industry->setAttribute('deleted', 'false');
-			
-			//       $industry = $doc->createElement('gd:extendedProperty');
-			//       $industry->setAttribute('name', 'industry');
-			//       $industry->setAttribute('value', 'coolInc');
-			//       $entry->appendChild($industry);
-			//
-			//       $industry = $doc->createElement('gd:organization');
-			// $industry->setAttribute('label', 'Industry');
-			// $industry->setAttribute('primary', 'true');
-			//
-			//       $orgName = $doc->createElement('gd:orgName', 'Some Industry');
-			//       $industry->appendChild($orgName);
-			//       $orgName = $doc->createElement('gd:orgTitle', 'Some Title');
-			//       $industry->appendChild($orgName);
-			
       $entry->appendChild($industry);
+						
+			if (!empty($referral)){
+	      $ref = $doc->createElement('gd:extendedProperty');
+	      $ref->setAttribute('name', 'referral');
+	      $ref->setAttribute('value', $referral);
+	      $entry->appendChild($ref);
+			}
+
+			if (!empty($manager)){
+	      $ref = $doc->createElement('gd:extendedProperty');
+	      $ref->setAttribute('name', 'manager');
+	      $ref->setAttribute('value', $manager);
+	      $entry->appendChild($ref);
+			}
+			
+			if (!empty($company) || !empty($title)){
+	      $org = $doc->createElement('gd:organization');
+				$org->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+				$org->setAttribute('primary', 'true');
+			
+				if (!empty($company)){
+		      $orgName = $doc->createElement('gd:orgName', $company);
+		      $org->appendChild($orgName);
+				}
+				if (!empty($title)){
+		      $orgName = $doc->createElement('gd:orgTitle', $title);
+		      $org->appendChild($orgName);
+				}
+			
+	      $entry->appendChild($org);
+			}
+
 			
       $xmlToSend = $doc->saveXML();
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Request XML'.PHP_EOL.$xmlToSend.PHP_EOL, FILE_APPEND);
 			
-			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Priming request header', FILE_APPEND);
 			
-
-      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full');
+			if ($cid !== false){
+				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'%%%% Priming UPDATE request header with CID: ' . $cid, FILE_APPEND);
+				
+	      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full/'.$cid);
+			} else {
+				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'++++ Priming CREATE request header', FILE_APPEND);
+	      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full');
+			}
       $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
       $req->setRequestMethod('POST');
       $req->setPostBody($xmlToSend);
