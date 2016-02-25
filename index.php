@@ -251,7 +251,7 @@
       $xmlContact = simplexml_load_string($response);
       $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
 			
-			$groups = self::xml2array($xmlContact);
+			$groups = OPContactProxy::xml2array($xmlContact);
 			
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'>>>>PARSED<<<<'.PHP_EOL.var_export($groups, true).PHP_EOL.PHP_EOL, FILE_APPEND);
 			
