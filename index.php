@@ -38,15 +38,10 @@
 		
 		public function check_for_requests(){
 			
-			if (isset($_GET['cb_op_action_oauth'])){
-				global $current_user;
-				get_currentuserinfo();
-				
-				if (!($current_user instanceof WP_User)){
-					echo "Please <a href='/wp-login.php'>login</a> before attempting to authenticate to google!";
-					die();
-				}
-				
+			if (isset($_GET['op_google_contact_integration'])){
+				include( dirname(__FILE__) . '/templates/create-user.php' );
+				die();
+			} else if (isset($_GET['cb_op_action_oauth'])){
 				session_start();
 
 				set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
@@ -61,8 +56,9 @@
 				$client->setApprovalPrompt('force');
 				$client->setAccessType('offline');
 				
-				$nonce = session_id() .'_UID_'. $current_user->ID;
+				$nonce = session_id();
 				$_SESSION['cb_op_nonce'] = $nonce;
+				$_SESSION[ $nonce ] = $_REQUEST['owner'];
 				
 				$auth_url = $client->createAuthUrl();
 				$auth_url .= '&state=cb_op_action_oauth_NONCE_'.$nonce;
@@ -73,11 +69,6 @@
 				$action = explode('_NONCE_', $_GET['state']);
 				if ($action[0] == 'cb_op_action_oauth'){
 					$nonce = $action[1];
-					
-					$parsedNonce = explode('_UID_', $nonce);
-			
-					session_start($parsedNonce[0]);
-					$user_id = $parsedNonce[1];
 			
 					if ($nonce == $_SESSION['cb_op_nonce']) {
 						set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/includes');
@@ -94,10 +85,25 @@
 			
 						$access_token = $client->getAccessToken();
 						$access_token_decoded = json_decode($access_token, true);
-			
-						update_user_meta($user_id, '_cb_op_google_code', $_GET['code']);
-						update_user_meta($user_id, '_cb_op_google_refresh_token', $access_token_decoded['refresh_token'] );
-						update_user_meta($user_id, '_cb_op_google_access_token', $access_token);
+
+						$owner = $_SESSION[ $nonce ];
+
+						$dataKey = "cb_op_".$owner;
+						$saveData = self::get_data($dataKey);
+						
+						$saveData['access_tokens'][ $_GET['code'] ] => array(
+							'code' => $_GET['code'],
+							'refresh_token' => $access_token_decoded['refresh_token'],
+							'access_token' => $access_token
+						);
+						
+						self::save_data($dataKey, $saveData);
+						
+						include( dirname(__FILE__) . '/templates/create-user-success.php' );
+						die();
+					} else {
+						echo "There was an error parsing your user nonce. Maybe the network timedout?";
+						die();
 					}
 				}
 			} else if ($_REQUEST['cb_op_action_import_contact'] && $_REQUEST['user_id']) {
@@ -112,15 +118,9 @@
 			
 				require_once( dirname(__FILE__) . '/includes/google-api-php-client/autoload.php');
 				
-				$user_id = $_REQUEST['user_id'];
-				$currentData = self::get_data("cb_op_emails_saved");
-				$email = $_REQUEST['email'];
-				
-				if (!isset($email) || empty($email) || in_array($email, $currentData)){
-					// file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'!!Duplicate!!', FILE_APPEND);
-					//
-					// die();
-				}
+				$owner = $_REQUEST['owner'];
+				$dataKey = "cb_op_".$owner;
+				$saveData = self::get_data($dataKey);
 				
 				$client = new Google_Client();
 				$client->setApplicationName("OP Contacts Proxy");
@@ -128,46 +128,53 @@
 				$client->setRedirectUri('http://wpdemo.tronnet.me/');
 				$client->addScope("https://www.google.com/m8/feeds");
 				
-				$refresh_token = get_user_meta($user_id, '_cb_op_google_refresh_token', true);
+				foreach($saveData['access_tokens'] as $access_token){
+
+					$refresh_token = $access_token['refresh_token'];
 				
-				try{
-					$client->refreshToken($refresh_token);
+					try{
+						$client->refreshToken($refresh_token);
 					
-				} catch (Exception $e){
-					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL."Issues refreshing token: " . $refresh_token.PHP_EOL, FILE_APPEND);
+					} catch (Exception $e){
+						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL."Issues refreshing token: " . $refresh_token.PHP_EOL, FILE_APPEND);
+						
+						continue;
+					}
 					
+					var_dump( $saveData );
 					die();
+					
+					$ret = OPContactProxy::_get_contact_groups();
+				
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
+				
+					die();
+				
+					$address = false;
+					if ( isset($_REQUEST['address'])
+								&& isset($_REQUEST['city'])
+								&& isset($_REQUEST['state'])
+								&& isset($_REQUEST['zip'])
+								&& isset($_REQUEST['country'])){
+						$address = $_REQUEST['address'] . (isset($_REQUEST['address2']) ? PHP_EOL.$_REQUEST['address2'] : '')
+							. PHP_EOL . $_REQUEST['city'] . ', ' . $_REQUEST['state'] . ' ' .  $_REQUEST['zip'];
+					}
+				
+					$comments = "Industry: ".$_REQUEST['industry'].PHP_EOL.PHP_EOL.$_REQUEST['notes'];
+					$name = $_REQUEST['fname'] . (!empty($_REQUEST['mname']) ? " " . $_REQUEST['mname'] : "")." ".$_REQUEST['lname'];
+					$email = $_REQUEST['email'];
+				
+					$ret = OPContactProxy::_create_contact($name, $_REQUEST['email'], $_REQUEST['pnum'], $_REQUEST['industry'], $address, $comments);
+				
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
+				
+					$currentData[ 'client' . $_REQUEST['cid'] ] = array(
+						'email' => $email,
+						'name' => $name,
+						'id' => $ret['id']
+					);
 				}
-				
-				$ret = OPContactProxy::_get_contact_groups();
-				
-				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
-				
-				die();
-				
-				$address = false;
-				if ( isset($_REQUEST['address'])
-							&& isset($_REQUEST['city'])
-							&& isset($_REQUEST['state'])
-							&& isset($_REQUEST['zip'])
-							&& isset($_REQUEST['country'])){
-					$address = $_REQUEST['address'] . (isset($_REQUEST['address2']) ? PHP_EOL.$_REQUEST['address2'] : '')
-						. PHP_EOL . $_REQUEST['city'] . ', ' . $_REQUEST['state'] . ' ' .  $_REQUEST['zip'];
-				}
-				
-				$comments = "Industry: "$_REQUEST['industry'].PHP_EOL.PHP_EOL.$_REQUEST['notes'];
-				$name = $client, $_REQUEST['fname'] (!empty($_REQUEST['mname']) ? " " . $_REQUEST['mname'] : "")." ".$_REQUEST['lname'];
-				
-				$ret = OPContactProxy::_create_contact($name, $_REQUEST['email'], $_REQUEST['pnum'], $_REQUEST['industry'], $address, $comments);
-				
-				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
-				
-				$currentData[ 'client' . $_REQUEST['cid'] ] = array(
-					'email' => $email,
-					'name' => $name,
-					'id' => $ret['id']
-				);
-				
+
 				self::save_data("cb_op_emails_saved", $currentData);
 				
 				die();
