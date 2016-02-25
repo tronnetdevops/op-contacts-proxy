@@ -66,9 +66,7 @@
 				
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Got request to authorize: '.$_SESSION[ $nonce ].PHP_EOL, FILE_APPEND);
 				file_put_contents( dirname(__FILE__) .'/update.txt', 'Using nonce: '.$nonce.PHP_EOL, FILE_APPEND);
-				
-				die();
-				
+								
 				header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
 				die();
 			} else if (isset($_GET['state'])){
@@ -97,7 +95,7 @@
 						$access_token = $client->getAccessToken();
 						$access_token_decoded = json_decode($access_token, true);
 
-						$owner = trim(strtolower($_SESSION[ $nonce ]));
+						$owner = $_SESSION[ $nonce ];
 
 						$dataKey = "cb_op_".$owner;
 						$saveData = self::get_data($dataKey);
