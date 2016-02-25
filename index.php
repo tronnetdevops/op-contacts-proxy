@@ -337,13 +337,13 @@
       $email->setAttribute('address', $emailAddress);
       $entry->appendChild($email);
 	
-			if ($phoneNumber){
+			if (!empty($phoneNumber)){
 				$contact = $doc->createElement('gd:phoneNumber', $phoneNumber);
 				$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
         $entry->appendChild($contact);
 			}
 			
-			if ($address){
+			if (!empty($address)){
 				$postalAddress = $doc->createElement('gd:postalAddress', $address);
 				$contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
         $entry->appendChild($postalAddress);					
@@ -352,7 +352,6 @@
 			$industry = $doc->createElement('gContact:groupMembershipInfo');
       $industry->setAttribute('href', $industryGroup['id']);
       $industry->setAttribute('deleted', 'false');
-			
 			
 			//       $industry = $doc->createElement('gd:extendedProperty');
 			//       $industry->setAttribute('name', 'industry');
