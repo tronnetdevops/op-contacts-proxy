@@ -129,7 +129,6 @@
 				
 				$owner = trim(strtolower($_REQUEST['owner']));
 				$dataKey = "cb_op_".$owner;
-				$clientKey = $code.'-'.$_REQUEST['cid'];
 				$saveData = self::get_data($dataKey);
 				
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'CURRENT SAVE DATA:'.PHP_EOL.var_export( $saveData,true).PHP_EOL, FILE_APPEND);
@@ -206,6 +205,7 @@
 						$comments .= PHP_EOL.PHP_EOL.$_REQUEST['notes'];
 					}
 					
+					$clientKey = $code.'-'.$_REQUEST['cid'];
 					$existing = $saveData['contacts'][ $clientKey ];
 					if (is_array($existing)){
 						$cid = $existing['id'];
@@ -461,7 +461,26 @@
 				$postalAddressDom->setAttribute('primary', 'true');
         $entry->appendChild($postalAddressDom);					
 			}
-						
+
+			if (!empty($company) || !empty($title)){
+	      $orgDom = $doc->createElement('gd:organization');
+				$orgDom->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+				$orgDom->setAttribute('primary', 'true');
+			
+				if (isset($company) && !empty($company)){
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Company: '.PHP_EOL.var_export($company, true).PHP_EOL, FILE_APPEND);
+		      $orgNameDom = $doc->createElement('gd:orgName', $company);
+		      $orgDom->appendChild($orgNameDom);
+				}
+				if (isset($title) && !empty($title)){
+					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Title: '.PHP_EOL.var_export($title, true).PHP_EOL, FILE_APPEND);
+		      $orgTitleDom = $doc->createElement('gd:orgTitle', $title);
+		      $orgDom->appendChild($orgTitleDom);
+				}
+			
+	      $entry->appendChild($orgDom);
+			}
+			
 			if (!empty($referral)){
 	      $referralDom = $doc->createElement('gd:extendedProperty');
 	      $referralDom->setAttribute('name', 'referral');
@@ -492,25 +511,6 @@
 				$websiteDom->setAttribute('rel', 'http://schemas.google.com/g/2005#profile');
 				$websiteDom->setAttribute('primary', 'true');
 	      $entry->appendChild($websiteDom);
-			}
-			
-			if (!empty($company) || !empty($title)){
-	      $orgDom = $doc->createElement('gd:organization');
-				$orgDom->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
-				$orgDom->setAttribute('primary', 'true');
-			
-				if (isset($company) && !empty($company)){
-					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Company: '.PHP_EOL.var_export($company, true).PHP_EOL, FILE_APPEND);
-		      $orgNameDom = $doc->createElement('gd:orgName', $company);
-		      $orgDom->appendChild($orgNameDom);
-				}
-				if (isset($title) && !empty($title)){
-					file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Title: '.PHP_EOL.var_export($title, true).PHP_EOL, FILE_APPEND);
-		      $orgTitleDom = $doc->createElement('gd:orgTitle', $title);
-		      $orgDom->appendChild($orgTitleDom);
-				}
-			
-	      $entry->appendChild($orgDom);
 			}
 			
 			$groupMemDom = $doc->createElement('gContact:groupMembershipInfo');
