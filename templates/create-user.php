@@ -80,7 +80,7 @@
 										
 									  <fieldset class="form-group">
 									    <label for="exampleInputEmail1">Contact Owner Name</label>
-									    <input type="owner" class="form-control" id="accountOwner" placeholder="Enter Contact Owner Name">
+									    <input name="owner" type="text" class="form-control" id="accountOwner" placeholder="Enter Contact Owner Name">
 									    <small class="text-muted">This name is how we'll identify your Ontraport account. Make sure it is exactly as it appears in the "Contact Owner" field of your Lead Information section of your contacts!</small>
 									  </fieldset>
 										
