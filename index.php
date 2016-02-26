@@ -308,7 +308,7 @@
 		
 		static private function _get_contact($client, $cid) {
 			
-      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/'.$cid);
+      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full/'.$cid);
       $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
       $req->setRequestMethod('GET');
 			
