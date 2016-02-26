@@ -220,9 +220,9 @@
 						
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Objects Found!'.PHP_EOL, FILE_APPEND);
 						
-						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($contactObjects, true).PHP_EOL, FILE_APPEND);
+						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($contactObjects['dom']-asXml(), true).PHP_EOL, FILE_APPEND);
 
-						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Edit URL: ' .var_export(strval($contactObjects['dom']->link[2]['href']), true).PHP_EOL, FILE_APPEND);
+						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Edit URL: ' .var_export($contactObjects['dom']->xpath('//gd:phoneNumber'), true).PHP_EOL, FILE_APPEND);
 						
 						die();
 						$ret = OPContactProxy::_create_contact($client, $cid, $id, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager, $workPhone, $cellPhone, $faxPhone);
@@ -370,6 +370,10 @@
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'>>>>PARSED<<<<'.PHP_EOL.var_export($groups, true).PHP_EOL.PHP_EOL, FILE_APPEND);
 			
 			return $groups;
+		}
+		
+		static private function _update_contact($client, $cid, $id, $name, $emailAddress, $phoneNumber, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager, $workPhone, $cellPhone, $faxPhone) {
+		
 		}
 		
 		static private function _create_contact_group($client, $name) {
