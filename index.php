@@ -213,6 +213,15 @@
 						$cid = $existing['id'];
 						$id = $existing['fullId'];
 						
+						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Fetching existing google contact'.PHP_EOL, FILE_APPEND);
+						
+						$contactObjects = OPContactProxy::_get_contact($client, $cid);
+						
+						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Objects Found!'.PHP_EOL, FILE_APPEND);
+						
+						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($contactObjects, true).PHP_EOL, FILE_APPEND);
+							
+						die();
 						$ret = OPContactProxy::_create_contact($client, $cid, $id, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager, $workPhone, $cellPhone, $faxPhone);
 						
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($ret, true).PHP_EOL, FILE_APPEND);
@@ -323,7 +332,11 @@
 			
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'>>>>PARSED<<<<'.PHP_EOL.var_export($contact, true).PHP_EOL.PHP_EOL, FILE_APPEND);
 			
-			return $contact;
+			return array(
+				'xml' => $response,
+				'dom' => $xmlContact,
+				'obj' => $contact
+			);
 		}
 
 		static private function _get_contact_groups($client) {
