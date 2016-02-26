@@ -217,6 +217,7 @@
 						
 						$contactObjects = OPContactProxy::_get_contact($client, $cid);
 						
+						$contactObjects['dom']->
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Objects Found!'.PHP_EOL, FILE_APPEND);
 						
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($contactObjects, true).PHP_EOL, FILE_APPEND);
@@ -308,7 +309,7 @@
 		
 		static private function _get_contact($client, $cid) {
 			
-      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full/'.$cid);
+      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full/'.$cid.'?alt=json');
       $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
       $req->setRequestMethod('GET');
 			
@@ -324,9 +325,10 @@
 			}
 			
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'===RESPONSE==='.PHP_EOL.$response.PHP_EOL.PHP_EOL, FILE_APPEND);
-			
+			die();
       $xmlContact = simplexml_load_string($response);
       $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
+      $xmlContact->registerXPathNamespace('gContact', 'http://schemas.google.com/contact/2008');
 			
 			$contact = OPContactProxy::xml2array($xmlContact);
 			
