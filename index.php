@@ -327,7 +327,7 @@
 			}
 			
 			file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'===RESPONSE==='.PHP_EOL.$response.PHP_EOL.PHP_EOL, FILE_APPEND);
-			die();
+
       $xmlContact = simplexml_load_string($response);
       $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
       $xmlContact->registerXPathNamespace('gContact', 'http://schemas.google.com/contact/2008');
