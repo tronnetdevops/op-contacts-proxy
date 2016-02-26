@@ -220,7 +220,7 @@
 						
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Objects Found!'.PHP_EOL, FILE_APPEND);
 						
-						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($contactObjects['dom']-asXml(), true).PHP_EOL, FILE_APPEND);
+						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($contactObjects['dom']->asXml(), true).PHP_EOL, FILE_APPEND);
 
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Edit URL: ' .var_export($contactObjects['dom']->xpath('//gd:phoneNumber'), true).PHP_EOL, FILE_APPEND);
 						
