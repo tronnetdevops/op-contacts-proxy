@@ -217,11 +217,13 @@
 						
 						$contactObjects = OPContactProxy::_get_contact($client, $cid);
 						
-						$contactObjects['dom']->
+						
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Objects Found!'.PHP_EOL, FILE_APPEND);
 						
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.var_export($contactObjects, true).PHP_EOL, FILE_APPEND);
 							
+						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Edit URL: ' .$contactObjects['dom']->link[2]->href.PHP_EOL, FILE_APPEND);
+						
 						die();
 						$ret = OPContactProxy::_create_contact($client, $cid, $id, $name, $email, $phone, $industryGroup, $address, $comments, $company, $title, $birthday, $url, $referral, $manager, $workPhone, $cellPhone, $faxPhone);
 						
@@ -309,7 +311,7 @@
 		
 		static private function _get_contact($client, $cid) {
 			
-      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full/'.$cid.'?alt=json');
+      $req = new Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full/'.$cid);
       $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
       $req->setRequestMethod('GET');
 			
