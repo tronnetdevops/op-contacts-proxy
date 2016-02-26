@@ -130,8 +130,8 @@
 				$owner = trim(strtolower($_REQUEST['owner']));
 				$dataKey = "cb_op_".$owner;
 				$saveData = self::get_data($dataKey);
-				// $saveData['contacts'] = array();
-				// self::save_data($dataKey, $saveData);
+				$saveData['contacts'] = array();
+				self::save_data($dataKey, $saveData);
 				
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.PHP_EOL.'CURRENT SAVE DATA:'.PHP_EOL.var_export( $saveData,true).PHP_EOL, FILE_APPEND);
 				
