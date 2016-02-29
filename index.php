@@ -685,13 +685,13 @@
 				echo "<h3>".$owner."</h3>";;
 				echo "<h5>Authorized Google Accounts: ".count($account['auths'])."</h5>";
 				echo "<p>Total contacts being managed</p>";
-				echo "<table>";
-				
+				echo "<table style='width: 100%'>";
+				echo "<thead><tr><th>Created</th><th>Contacts Managed</th><th>Controls</th></tr></thead><tbody>";
 				foreach($account['auths'] as $code=>$auth){
-					echo "<tr><td width='40%'>Created: ".date("M d, Y", $account['created'])."</td><td width='30%'>Contacts Managed: ".count($accountData['auths'][ $code ]['contacts'])."</td> <td width='30%'>Controls: <a href='?cb_op_unauth_account=true&owner=".$owner."&code=".$code."'>Delete</a></td></tr>";
+					echo "<tr><td width='40%'>".date("M d, Y", $account['created'])."</td><td width='30%'>".count($accountData['auths'][ $code ]['contacts'])."</td> <td width='30%'><a href='?cb_op_unauth_account=true&owner=".$owner."&code=".$code."'>Delete</a></td></tr>";
 				}
 				
-				echo "</table><hr/>";
+				echo "</tbody></table><hr/>";
 				
 			}
 			
