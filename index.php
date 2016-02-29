@@ -680,16 +680,15 @@
 				
 				
 				echo "<h3>".$owner."</h3>";;
-				echo "<h5>>Authorized Google Accounts: ".count($account['auths'])."</h5>";
+				echo "<h5>Authorized Google Accounts: ".count($account['auths'])."</h5>";
 				echo "<p>Total contacts being managed</p>";
 				echo "<table>";
 				
 				foreach($account['auths'] as $code=>$auth){
-					var_dump($accountData[ $code ]);
 					echo "<tr><td>".count($accountData['auths'][ $code ]['contacts'])."</td> <td><a href='?cb_op_unauth_account=true&owner=".$owner."&code=".$code."'>Delete</a></td></tr>";
 				}
 				
-				echo "</table>";
+				echo "</table><hr/>";
 				
 			}
 			
