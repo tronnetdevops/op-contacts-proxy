@@ -70,12 +70,14 @@
 							<div class="panel panel-default">
 								<div class="panel-heading">
 									<h3 class="panel-title">
-										<i class="fa fa-bolt"></i>
+										<i class="fa fa-thumbs-o-up"></i>
 										Success
 									</h3>
 								</div>
 								<div class="panel-body">
 									<p>You're account will now use the Ontraport to Google Contacts app to import contacts!</p>
+									
+									<a href="/?op_google_contact_integration=true"><i class="fa fa-plus"></i> Add Another Account</a>
 								</div>
 							</div>
 						</div>

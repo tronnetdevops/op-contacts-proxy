@@ -282,6 +282,15 @@
 					
 						file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'Cool that handles that contact!'.PHP_EOL, FILE_APPEND);
 					}
+				} else if (isset($_REQUEST['cb_op_unauth_account']) && isset($_REQUEST['owner']) && isset($_REQUEST['code'])){
+					$saveData = self::get_data('cb_op_requests');
+					$ownerData = self::get_data("cb_op_".$owner);
+					
+					unset($saveData['accounts'][ $_REQUEST['owner'] ]['auths'][ $_REQUEST['code'] ]);
+					unset($ownerData['auths'][ $_REQUEST['code'] ]);
+					
+					self::save_data('cb_op_requests', $saveData);
+					self::save_data("cb_op_".$owner, $ownerData);
 				}
 
 				file_put_contents( dirname(__FILE__) .'/update.txt', PHP_EOL.'All accounts have been updated!'.PHP_EOL, FILE_APPEND);
@@ -670,10 +679,10 @@
 		
 
 		public function setup_menu(){
-			add_menu_page( 'Ontraport Contact Ingetration', 'OP to Goolge', 'manage_options', 'opcontactproxy', array( 'OPContactProxy', 'test_init') );
+			add_menu_page( 'Ontraport Contact Ingetration', 'OP to Goolge', 'manage_options', 'opcontactproxy', array( 'OPContactProxy', 'build_admin_page') );
 		}
 		
-		public function test_init(){
+		public function build_admin_page(){
 			$saveData = self::get_data('cb_op_requests');
 			echo "<h1>Contact Import Users!</h1>";
 			echo "<p>A list of existing contact owners that have synchronized their accounts.</p>";
