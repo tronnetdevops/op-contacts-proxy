@@ -263,7 +263,9 @@
 			
 							$parsedId = explode('/', $ret['id']);
 							$parsedId = $parsedId[ count($parsedId) - 1 ];
-						
+							
+							$insertDate = date();
+							
 							$saveData = self::get_data($dataKey);
 						
 							$saveData['auths'][ $code ]['contacts'][] = $clientKey;
@@ -273,7 +275,8 @@
 								'cid' => $_REQUEST['cid'],
 								'data' => $ret,
 								'fullId' => $ret['id'],
-								'id' => $parsedId
+								'id' => $parsedId,
+								'created' => $insertDate
 							));
 						}
 					
@@ -685,7 +688,7 @@
 				echo "<table>";
 				
 				foreach($account['auths'] as $code=>$auth){
-					echo "<tr><td>".count($accountData['auths'][ $code ]['contacts'])."</td> <td><a href='?cb_op_unauth_account=true&owner=".$owner."&code=".$code."'>Delete</a></td></tr>";
+					echo "<tr><td>".date("M d, Y", $account['created'])."</td><td>".count($accountData['auths'][ $code ]['contacts'])."</td> <td><a href='?cb_op_unauth_account=true&owner=".$owner."&code=".$code."'>Delete</a></td></tr>";
 				}
 				
 				echo "</table><hr/>";
@@ -699,8 +702,8 @@
 	}
 	
 	
-    register_activation_hook( __FILE__, array( 'OPContactProxy', 'myplugin_activate' ) );
-    register_deactivation_hook( __FILE__, array( 'OPContactProxy', 'myplugin_deactivate' ) );
+  register_activation_hook( __FILE__, array( 'OPContactProxy', 'myplugin_activate' ) );
+  register_deactivation_hook( __FILE__, array( 'OPContactProxy', 'myplugin_deactivate' ) );
 	
 	add_action( 'plugins_loaded', array( 'OPContactProxy', 'get_instance' ) );
 	add_action( 'wp_loaded', array( 'OPContactProxy', 'check_for_requests' ) );
