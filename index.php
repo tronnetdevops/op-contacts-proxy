@@ -682,9 +682,7 @@
 				$accountData = self::get_data('cb_op_' . $owner);
 				
 				
-				echo "<h3>".$owner."</h3>";;
-				echo "<h5>Authorized Google Accounts: ".count($account['auths'])."</h5>";
-				echo "<p>Total contacts being managed</p>";
+				echo "<h3>".$owner.": <small> ".count($account['auths'])." managed accounts</small></h3>";
 				echo "<table style='width: 100%'>";
 				echo "<thead><tr><th>Created</th><th>Contacts Managed</th><th>Controls</th></tr></thead><tbody>";
 				foreach($account['auths'] as $code=>$auth){
