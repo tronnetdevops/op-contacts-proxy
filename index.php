@@ -673,23 +673,26 @@
 		public function test_init(){
 			$saveData = self::get_data('cb_op_requests');
 			echo "<h1>Contact Import Users!</h1>";
-			echo "<table>";
+			echo "<p>A list of existing contact owners that have synchronized their accounts.</p>";
 			
 			foreach($saveData['accounts'] as $owner=>$account){
 				$accountData = self::get_data('cb_op_' . $owner);
 				
-				echo "<tr><td>".$owner."</td><td>".count($account['auths'])."</td><td></td></tr>";
+				
+				echo "<h3>".$owner."</h3>";;
+				echo "<h5>>Authorized Google Accounts: ".count($account['auths'])."</h5>";
+				echo "<p>Total contacts being managed</p>";
+				echo "<table>";
 				
 				foreach($account['auths'] as $code=>$auth){
-					
 					var_dump($accountData[ $code ]);
-					
-					echo "<tr><td></td><td></td><td>".count($accountData['auths'][ $code ]['contacts'])."</td></tr>";
-					
+					echo "<tr><td>".count($accountData['auths'][ $code ]['contacts'])."</td> <td><a href='?cb_op_unauth_account=true&owner=".$owner."&code=".$code."'>Delete</a></td></tr>";
 				}
+				
+				echo "</table>";
+				
 			}
 			
-			echo "</table>";
 			
 			// self::save_data('cb_op_requests', array());
 			// self::save_data("cb_op_anthony davenport", array());
