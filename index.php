@@ -688,7 +688,7 @@
 				echo "<table>";
 				
 				foreach($account['auths'] as $code=>$auth){
-					echo "<tr><td>".date("M d, Y", $account['created'])."</td><td>".count($accountData['auths'][ $code ]['contacts'])."</td> <td><a href='?cb_op_unauth_account=true&owner=".$owner."&code=".$code."'>Delete</a></td></tr>";
+					echo "<tr><td>Created: ".date("M d, Y", $account['created'])."</td><td>Contacts Managed: ".count($accountData['auths'][ $code ]['contacts'])."</td> <td>Controls: <a href='?cb_op_unauth_account=true&owner=".$owner."&code=".$code."'>Delete</a></td></tr>";
 				}
 				
 				echo "</table><hr/>";
